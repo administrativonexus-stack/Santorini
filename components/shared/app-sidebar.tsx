@@ -30,10 +30,18 @@ const ADMIN_NAV: NavItem[] = [
   { label: "Clientes", href: "/admin/clients", icon: "◉" },
 ];
 
+const OWNER_NAV: NavItem[] = [
+  { label: "Dashboard", href: "/admin/dashboard", icon: "⬡" },
+  { label: "Financeiro", href: "/admin/finance", icon: "◆" },
+  { label: "Barbeiros", href: "/admin/barbers", icon: "✂" },
+  { label: "Serviços", href: "/admin/services", icon: "◈" },
+  { label: "Clientes", href: "/admin/clients", icon: "◉" },
+];
+
 const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
   client: CLIENT_NAV,
   barber: BARBER_NAV,
-  owner: ADMIN_NAV,
+  owner: OWNER_NAV,
   admin: ADMIN_NAV,
 };
 
