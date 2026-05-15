@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -10,7 +12,6 @@ import { Label } from "@/components/ui/label";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const supabase = createClient();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -34,6 +35,7 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
 
+    const supabase = createClient();
     const { error } = await supabase.auth.signUp({
       email,
       password,
