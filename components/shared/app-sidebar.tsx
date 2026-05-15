@@ -48,9 +48,11 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
 interface AppSidebarProps {
   role: UserRole;
   fullName: string;
+  className?: string;
+  onClose?: () => void;
 }
 
-export function AppSidebar({ role, fullName }: AppSidebarProps) {
+export function AppSidebar({ role, fullName, className, onClose }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const items = NAV_BY_ROLE[role];
@@ -63,12 +65,23 @@ export function AppSidebar({ role, fullName }: AppSidebarProps) {
   }
 
   return (
-    <aside className="flex h-full w-60 flex-col border-r border-border bg-sidebar">
+    <aside className={`flex h-full w-60 flex-col border-r border-border bg-sidebar ${className ?? ""}`}>
       {/* Logo */}
-      <div className="flex h-16 items-center px-6 border-b border-border">
+      <div className="flex h-16 items-center justify-between px-6 border-b border-border">
         <span className="font-heading text-xl font-bold tracking-widest text-primary">
           BARBERFLIX
         </span>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Fechar menu"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M3.293 3.293a1 1 0 011.414 0L8 6.586l3.293-3.293a1 1 0 111.414 1.414L9.414 8l3.293 3.293a1 1 0 01-1.414 1.414L8 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L6.586 8 3.293 4.707a1 1 0 010-1.414z" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Nav */}

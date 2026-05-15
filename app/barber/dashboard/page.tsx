@@ -98,7 +98,7 @@ export default async function BarberDashboard() {
                 <p className="text-sm text-muted-foreground">
                   {service?.name} · {service?.duration_minutes} min
                 </p>
-                <div className="flex gap-4 text-xs text-muted-foreground">
+                <div className="flex flex-wrap gap-2 sm:gap-4 text-xs text-muted-foreground">
                   <span>
                     {new Date(apt.scheduled_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                     {" – "}

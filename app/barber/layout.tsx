@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { AppSidebar } from "@/components/shared/app-sidebar";
+import { DashboardShell } from "@/components/shared/dashboard-shell";
 
 export default async function BarberLayout({
   children,
@@ -25,11 +25,8 @@ export default async function BarberLayout({
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <AppSidebar role={profile.role} fullName={profile.full_name} />
-      <main className="flex-1 overflow-y-auto">
-        <div className="p-6">{children}</div>
-      </main>
-    </div>
+    <DashboardShell role={profile.role} fullName={profile.full_name}>
+      {children}
+    </DashboardShell>
   );
 }

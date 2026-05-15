@@ -78,7 +78,7 @@ export default async function ClientDashboard() {
       </div>
 
       {/* Subscription status */}
-      <div className="rounded-xl border border-border bg-card p-5 flex items-center justify-between">
+      <div className="rounded-xl border border-border bg-card p-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">
             Plano
@@ -141,7 +141,7 @@ export default async function ClientDashboard() {
                 {STATUS_LABEL[activeAppointment.status]}
               </Badge>
             </div>
-            <div className="flex gap-6 text-sm">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 text-sm">
               <div>
                 <span className="text-muted-foreground">Data: </span>
                 <span className="text-foreground font-medium">
@@ -182,7 +182,7 @@ export default async function ClientDashboard() {
 
       {/* Quick actions */}
       {!activeAppointment && (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Link
             href="/client/schedule"
             className={cn(

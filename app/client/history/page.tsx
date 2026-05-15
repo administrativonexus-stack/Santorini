@@ -97,7 +97,7 @@ export default function HistoryPage() {
                     {STATUS_LABEL[apt.status] ?? apt.status}
                   </Badge>
                 </div>
-                <div className="flex gap-5 text-xs text-muted-foreground">
+                <div className="flex flex-wrap gap-2 sm:gap-5 text-xs text-muted-foreground">
                   <span>
                     {new Date(apt.scheduled_at).toLocaleDateString("pt-BR", {
                       weekday: "long", day: "numeric", month: "long", year: "numeric",

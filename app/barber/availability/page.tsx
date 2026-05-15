@@ -129,8 +129,8 @@ export default function AvailabilityPage() {
           {DAYS.map(({ key, label }) => {
             const val = hours[key];
             return (
-              <div key={key} className="flex items-center gap-3">
-                <label className="flex items-center gap-2 w-24 cursor-pointer">
+              <div key={key} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <label className="flex items-center gap-2 sm:w-24 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={val.is_active}
@@ -146,7 +146,7 @@ export default function AvailabilityPage() {
                   value={val.start_time}
                   onChange={(e) => updateDay(key, "start_time", e.target.value)}
                   disabled={!val.is_active}
-                  className="w-28 text-xs"
+                  className="w-full sm:w-28 text-xs"
                 />
                 <span className="text-muted-foreground text-xs">até</span>
                 <Input
@@ -154,7 +154,7 @@ export default function AvailabilityPage() {
                   value={val.end_time}
                   onChange={(e) => updateDay(key, "end_time", e.target.value)}
                   disabled={!val.is_active}
-                  className="w-28 text-xs"
+                  className="w-full sm:w-28 text-xs"
                 />
               </div>
             );

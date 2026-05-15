@@ -230,7 +230,7 @@ export default function SchedulePage() {
       {/* Step 3 — Select Date */}
       {step === 3 && (
         <div className="space-y-3">
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {dateOptions.map((d) => {
               const isToday = d.toDateString() === new Date().toDateString();
               return (
@@ -275,7 +275,7 @@ export default function SchedulePage() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {slots.map((t) => (
                 <button
                   key={t}

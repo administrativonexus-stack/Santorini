@@ -66,7 +66,7 @@ export default async function AdminDashboard() {
         <p className="text-muted-foreground mt-1">Visão geral da Barbearia Santorini.</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {stats.map((stat) => (
           <div key={stat.label} className="rounded-xl border border-border bg-card p-5 space-y-1">
             <p className="text-xs text-muted-foreground uppercase tracking-widest">{stat.label}</p>
