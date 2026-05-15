@@ -102,7 +102,7 @@ export async function PATCH(req: NextRequest) {
   const body = await req.json();
   if (!body.id) return NextResponse.json({ error: "id obrigatório" }, { status: 400 });
 
-  const update: Record<string, unknown> = {};
+  const update: { bio?: string | null; commission_rate?: number; is_active?: boolean } = {};
   if (body.bio !== undefined) update.bio = body.bio || null;
   if (body.commission_rate !== undefined) update.commission_rate = body.commission_rate;
   if (body.is_active !== undefined) update.is_active = body.is_active;

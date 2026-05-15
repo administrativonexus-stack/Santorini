@@ -181,7 +181,7 @@ export default function BarberSchedulePage() {
               </div>
               <div className="space-y-1.5">
                 <Label>Status</Label>
-                <Select value={newStatus} onValueChange={setNewStatus}>
+                <Select value={newStatus} onValueChange={(v) => v && setNewStatus(v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {STATUS_OPTIONS.map((s) => (

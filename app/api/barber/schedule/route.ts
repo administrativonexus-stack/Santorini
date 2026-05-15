@@ -67,7 +67,7 @@ export async function PATCH(req: NextRequest) {
 
   const { error: upErr } = await admin
     .from("appointments")
-    .update({ status: newStatus, notes: notes?.trim() || null })
+    .update({ status: newStatus as import("@/types/database").AppointmentStatus, notes: notes?.trim() || null })
     .eq("id", id);
 
   if (upErr) return NextResponse.json({ error: upErr.message }, { status: 500 });
