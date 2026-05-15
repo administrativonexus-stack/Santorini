@@ -20,6 +20,7 @@ const BARBER_NAV: NavItem[] = [
   { label: "Agenda", href: "/barber/dashboard", icon: "⬡" },
   { label: "Horários", href: "/barber/schedule", icon: "📅" },
   { label: "Disponibilidade", href: "/barber/availability", icon: "⏰" },
+  { label: "Perfil", href: "/barber/profile", icon: "◉" },
 ];
 
 const ADMIN_NAV: NavItem[] = [
