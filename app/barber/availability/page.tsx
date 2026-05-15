@@ -146,7 +146,7 @@ export default function AvailabilityPage() {
                   value={val.start_time}
                   onChange={(e) => updateDay(key, "start_time", e.target.value)}
                   disabled={!val.is_active}
-                  className="w-full sm:w-28 text-xs"
+                  className="w-full sm:w-28"
                 />
                 <span className="text-muted-foreground text-xs">até</span>
                 <Input
@@ -154,7 +154,7 @@ export default function AvailabilityPage() {
                   value={val.end_time}
                   onChange={(e) => updateDay(key, "end_time", e.target.value)}
                   disabled={!val.is_active}
-                  className="w-full sm:w-28 text-xs"
+                  className="w-full sm:w-28"
                 />
               </div>
             );

@@ -14,7 +14,7 @@ export function DashboardShell({ role, fullName, children }: DashboardShellProps
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-background overflow-hidden" style={{ height: "100dvh" }}>
       {/* Desktop sidebar */}
       <AppSidebar role={role} fullName={fullName} className="hidden md:flex" />
 
@@ -42,7 +42,7 @@ export function DashboardShell({ role, fullName, children }: DashboardShellProps
         <header className="md:hidden flex items-center gap-3 px-4 h-14 border-b border-border bg-background/95 backdrop-blur sticky top-0 z-30 shrink-0">
           <button
             onClick={() => setOpen(true)}
-            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground transition-colors"
+            className="p-3 -ml-1 rounded-md text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Abrir menu"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
