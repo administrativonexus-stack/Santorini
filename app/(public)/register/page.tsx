@@ -6,6 +6,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+
+const ROLE_HOME: Record<string, string> = {
+  client: "/client/dashboard",
+  barber: "/barber/dashboard",
+  owner: "/admin/dashboard",
+  admin: "/admin/dashboard",
+};
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,7 +43,7 @@ export default function RegisterPage() {
     setError("");
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -51,6 +58,19 @@ export default function RegisterPage() {
       return;
     }
 
+    if (data.session) {
+      // Email confirmation disabled — session created immediately, redirect to dashboard
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.session.user.id)
+        .single();
+      const dest = ROLE_HOME[profile?.role ?? "client"] ?? "/client/dashboard";
+      window.location.href = dest;
+      return;
+    }
+
+    // Email confirmation enabled — show verify screen
     setSuccess(true);
     setLoading(false);
   }
