@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { Crown, ChevronRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { fadeUp, stagger } from "@/lib/motion";
@@ -82,7 +83,7 @@ export function DashboardContent({
       {/* Greeting */}
       <motion.div variants={fadeUp} className="pt-1">
         <h1 className="font-heading text-[28px] font-bold text-foreground leading-tight">
-          Olá, {firstName}! 👋
+          Olá, {firstName}!
         </h1>
         <p className="text-sm text-white/40 mt-0.5">Pronto para um novo visual?</p>
       </motion.div>
@@ -107,15 +108,15 @@ export function DashboardContent({
               <p className="text-[11px] text-white/50 leading-tight">
                 {new Date(activeAppointment.scheduled_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · {barberName}
               </p>
-              <Link href="/client/history" className="text-[10px] text-primary font-medium tracking-wide uppercase">
-                VER DETALHES →
+              <Link href="/client/history" className="text-[10px] text-primary font-medium tracking-wide uppercase flex items-center gap-0.5">
+                VER DETALHES <ChevronRight className="w-3 h-3" />
               </Link>
             </>
           ) : (
             <>
               <p className="text-xs text-white/30">Nenhum agendado</p>
-              <Link href="/client/schedule" className="text-[10px] text-primary font-medium tracking-wide uppercase">
-                AGENDAR →
+              <Link href="/client/schedule" className="text-[10px] text-primary font-medium tracking-wide uppercase flex items-center gap-0.5">
+                AGENDAR <ChevronRight className="w-3 h-3" />
               </Link>
             </>
           )}
@@ -139,15 +140,15 @@ export function DashboardContent({
                   Ativo até {new Date(subscription.current_period_end).toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" })}
                 </p>
               )}
-              <Link href="/client/subscription" className="text-[10px] text-primary font-medium tracking-wide uppercase">
-                GERENCIAR →
+              <Link href="/client/subscription" className="text-[10px] text-primary font-medium tracking-wide uppercase flex items-center gap-0.5">
+                GERENCIAR <ChevronRight className="w-3 h-3" />
               </Link>
             </>
           ) : (
             <>
               <p className="text-xs text-white/30">Sem plano ativo</p>
-              <Link href="/client/subscription" className="text-[10px] text-primary font-medium tracking-wide uppercase">
-                ASSINAR →
+              <Link href="/client/subscription" className="text-[10px] text-primary font-medium tracking-wide uppercase flex items-center gap-0.5">
+                ASSINAR <ChevronRight className="w-3 h-3" />
               </Link>
             </>
           )}
@@ -163,7 +164,7 @@ export function DashboardContent({
             </div>
             <p className="text-[10px] text-white/40 uppercase tracking-wider">Cortes este mês</p>
           </div>
-          <p className="text-2xl font-heading font-bold text-foreground">{appointmentCount}</p>
+          <p className="text-3xl font-heading font-semibold tracking-tight text-foreground">{appointmentCount}</p>
           <p className="text-[10px] text-white/30">na Barbearia Santorini</p>
         </div>
 
@@ -245,7 +246,7 @@ export function DashboardContent({
               <p className="font-heading text-base font-bold text-foreground">Seja VIP.</p>
               <p className="text-xs text-white/50 mt-1">Cortes ilimitados, prioridade e benefícios exclusivos.</p>
             </div>
-            <span className="text-3xl shrink-0">♛</span>
+            <Crown className="w-7 h-7 text-primary shrink-0" />
           </div>
           <Link
             href="/client/subscription"

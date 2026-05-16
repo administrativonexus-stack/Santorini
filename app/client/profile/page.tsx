@@ -20,16 +20,20 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
   return (
     <button
       onClick={() => onChange(!checked)}
-      className={cn(
-        "relative w-10 h-6 rounded-full transition-colors duration-200 shrink-0",
-        checked ? "bg-primary" : "bg-white/10"
-      )}
       type="button"
+      className={cn(
+        "relative w-12 h-[26px] rounded-full transition-colors duration-300 shrink-0 border focus-visible:outline-none",
+        checked ? "bg-primary/80 border-primary/40" : "bg-white/[0.08] border-white/[0.08]"
+      )}
     >
-      <span className={cn(
-        "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200",
-        checked ? "translate-x-[18px]" : "translate-x-0.5"
-      )} />
+      <motion.span
+        animate={{ x: checked ? 22 : 2 }}
+        transition={{ type: "spring", stiffness: 600, damping: 40 }}
+        className={cn(
+          "absolute top-[3px] h-5 w-5 rounded-full shadow-sm",
+          checked ? "bg-foreground" : "bg-white/40"
+        )}
+      />
     </button>
   );
 }

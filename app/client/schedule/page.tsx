@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { Crown, Star, Check, ChevronLeft, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BarberOption {
@@ -20,14 +21,13 @@ interface ServiceOption {
   category: string | null;
 }
 
-type Step = 1 | 2 | 3 | 4 | 5;
+type Step = 1 | 2 | 3 | 4;
 
 const STEP_CONFIG = [
-  { label: "BARBEIRO", sub: "Escolha" },
-  { label: "SERVIÇO", sub: "Selecione" },
-  { label: "DATA", sub: "Escolha o dia" },
-  { label: "HORÁRIO", sub: "Escolha o horário" },
-  { label: "CONFIRMAR", sub: "Confirme" },
+  { label: "BARBEIRO",   sub: "Escolha" },
+  { label: "SERVIÇO",    sub: "Selecione" },
+  { label: "DATA & HORA", sub: "Escolha" },
+  { label: "CONFIRMAR",  sub: "Confirme" },
 ];
 
 function StepIndicator({ current }: { current: Step }) {
@@ -39,18 +39,14 @@ function StepIndicator({ current }: { current: Step }) {
         const isDone = num < current;
         return (
           <div key={num} className="flex items-center">
-            <div className="flex flex-col items-center gap-1 min-w-[60px]">
+            <div className="flex flex-col items-center gap-1 min-w-[64px]">
               <div className={cn(
                 "h-8 w-8 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all duration-300",
                 isActive && "border-primary bg-primary/15 text-primary shadow-[0_0_12px_rgba(201,169,110,0.3)]",
-                isDone && "border-primary/40 bg-primary/5 text-primary/50",
+                isDone && "border-primary/40 bg-primary/5 text-primary/60",
                 !isActive && !isDone && "border-white/10 bg-transparent text-white/20"
               )}>
-                {isDone ? (
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                ) : num}
+                {isDone ? <Check className="w-3.5 h-3.5" /> : num}
               </div>
               <span className={cn(
                 "text-[9px] font-bold tracking-wider uppercase leading-none text-center",
@@ -59,7 +55,7 @@ function StepIndicator({ current }: { current: Step }) {
                 {s.label}
               </span>
             </div>
-            {i < 4 && (
+            {i < 3 && (
               <div className={cn(
                 "w-6 h-px mx-0.5 border-t border-dashed mb-5 flex-shrink-0",
                 isDone ? "border-primary/50" : "border-white/10"
@@ -76,6 +72,14 @@ function getInitials(name: string) {
   return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
 }
 
+function isToday(d: Date) {
+  return d.toDateString() === new Date().toDateString();
+}
+function isTomorrow(d: Date) {
+  const t = new Date(); t.setDate(t.getDate() + 1);
+  return d.toDateString() === t.toDateString();
+}
+
 export default function SchedulePage() {
   const router = useRouter();
 
@@ -84,6 +88,8 @@ export default function SchedulePage() {
   const [services, setServices] = useState<ServiceOption[]>([]);
   const [slots, setSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [quickSlots, setQuickSlots] = useState<{ date: Date; time: string }[]>([]);
+  const [loadingQuick, setLoadingQuick] = useState(false);
   const [selectedBarber, setSelectedBarber] = useState<BarberOption | null>(null);
   const [selectedService, setSelectedService] = useState<ServiceOption | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -101,12 +107,31 @@ export default function SchedulePage() {
 
   useEffect(() => { loadBarbers(); }, [loadBarbers]);
 
+  async function loadQuickSlots(barberId: string, duration: number) {
+    setLoadingQuick(true);
+    setQuickSlots([]);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const dates = [0, 1, 2].map(n => {
+      const d = new Date(today); d.setDate(d.getDate() + n); return d;
+    });
+    const results = await Promise.all(dates.map(async (d) => {
+      const dateStr = d.toISOString().split("T")[0];
+      const res = await fetch(`/api/client/slots?barberId=${barberId}&date=${dateStr}&duration=${duration}`);
+      if (!res.ok) return [];
+      const { slots: s } = await res.json();
+      return (s ?? []).slice(0, 2).map((t: string) => ({ date: d, time: t }));
+    }));
+    setQuickSlots(results.flat().slice(0, 3));
+    setLoadingQuick(false);
+  }
+
   async function selectBarber(b: BarberOption) {
     setSelectedBarber(b);
     setSelectedService(null);
     setSelectedDate(null);
     setSelectedTime(null);
     setServices([]);
+    setQuickSlots([]);
     setStep(2);
     const res = await fetch(`/api/client/services?barberId=${b.id}`);
     if (!res.ok) return;
@@ -115,19 +140,22 @@ export default function SchedulePage() {
     setIsVip(vip);
   }
 
-  function selectService(s: ServiceOption) {
+  async function selectService(s: ServiceOption) {
     setSelectedService(s);
     setSelectedDate(null);
     setSelectedTime(null);
+    setSlots([]);
     setStep(3);
+    if (selectedBarber) {
+      loadQuickSlots(selectedBarber.id, s.duration_minutes);
+    }
   }
 
-  async function selectDate(d: Date) {
+  async function pickDate(d: Date) {
     setSelectedDate(d);
     setSelectedTime(null);
     setLoadingSlots(true);
     setSlots([]);
-    setStep(4);
     const dateStr = d.toISOString().split("T")[0];
     const res = await fetch(`/api/client/slots?barberId=${selectedBarber!.id}&date=${dateStr}&duration=${selectedService!.duration_minutes}`);
     if (res.ok) { const { slots: data } = await res.json(); setSlots(data ?? []); }
@@ -136,7 +164,13 @@ export default function SchedulePage() {
 
   function selectTime(t: string) {
     setSelectedTime(t);
-    setStep(5);
+    setStep(4);
+  }
+
+  function quickSelect(date: Date, time: string) {
+    setSelectedDate(date);
+    setSelectedTime(time);
+    setStep(4);
   }
 
   async function confirm() {
@@ -192,14 +226,12 @@ export default function SchedulePage() {
           {/* Step 1 — Barber */}
           {step === 1 && (
             <div className="space-y-3">
-              <div className="flex items-center justify-between mb-1">
-                <div>
-                  <p className="text-base font-semibold text-foreground flex items-center gap-2">
-                    <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></svg>
-                    Escolha seu barbeiro
-                  </p>
-                  <p className="text-xs text-white/30 mt-0.5">Nossos profissionais estão prontos para te atender.</p>
-                </div>
+              <div className="mb-1">
+                <p className="text-base font-semibold text-foreground flex items-center gap-2">
+                  <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></svg>
+                  Escolha seu barbeiro
+                </p>
+                <p className="text-xs text-white/30 mt-0.5">Nossos profissionais estão prontos para te atender.</p>
               </div>
               {barbers.length === 0 ? (
                 <div className="rounded-2xl border border-white/[0.06] bg-card p-10 text-center text-sm text-white/30">
@@ -228,11 +260,13 @@ export default function SchedulePage() {
                           <div className="flex items-center gap-2">
                             <p className="font-semibold text-foreground">{name}</p>
                             <span className="flex items-center gap-0.5 text-xs text-amber-400 font-medium">
-                              ★ 4.9
+                              <Star className="w-3 h-3 fill-amber-400" /> 4.9
                             </span>
                           </div>
                           {b.bio && <p className="text-xs text-white/40 mt-0.5 line-clamp-1">{b.bio}</p>}
-                          <p className="text-[11px] text-white/30 mt-1.5">✓ Especialista em Degradê e Barba</p>
+                          <p className="text-[11px] text-white/30 mt-1.5 flex items-center gap-1">
+                            <Check className="w-3 h-3 text-primary/60" /> Especialista em Degradê e Barba
+                          </p>
                         </div>
                         <svg className="w-4 h-4 text-white/20 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                       </div>
@@ -270,10 +304,12 @@ export default function SchedulePage() {
                         {isVip ? (
                           <div>
                             <span className="text-xs line-through text-white/30">R$ {s.price.toFixed(2)}</span>
-                            <p className="text-sm font-bold text-primary">GRÁTIS ♛</p>
+                            <p className="text-sm font-bold text-primary flex items-center gap-1 justify-end">
+                              GRÁTIS <Crown className="w-3.5 h-3.5" />
+                            </p>
                           </div>
                         ) : (
-                          <p className="text-lg font-heading font-bold text-primary">R$ {s.price.toFixed(2)}</p>
+                          <p className="text-xl font-heading font-semibold tracking-tight text-primary">R$ {s.price.toFixed(2)}</p>
                         )}
                       </div>
                     </div>
@@ -281,97 +317,140 @@ export default function SchedulePage() {
                 ))
               )}
               <button onClick={() => setStep(1)} className="flex items-center gap-1 text-sm text-white/30 hover:text-white/60 transition-colors mt-1">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                Voltar
+                <ChevronLeft className="w-4 h-4" /> Voltar
               </button>
             </div>
           )}
 
-          {/* Step 3 — Date */}
+          {/* Step 3 — Date & Time (combined) */}
           {step === 3 && (
             <div className="space-y-4">
               <div>
-                <p className="text-base font-semibold text-foreground">Escolha a data</p>
-                <p className="text-xs text-white/30 mt-0.5">Selecione o melhor dia para você.</p>
+                <p className="text-base font-semibold text-foreground">Data e horário</p>
+                <p className="text-xs text-white/30 mt-0.5">Selecione o melhor dia e horário para você.</p>
               </div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                {dateOptions.map((d) => {
-                  const isToday = d.toDateString() === new Date().toDateString();
-                  return (
-                    <motion.button
-                      key={d.toISOString()}
-                      onClick={() => selectDate(d)}
-                      whileTap={{ scale: 0.93 }}
-                      className={cn(
-                        "rounded-xl border px-2 py-3 flex flex-col items-center justify-center min-h-[72px] transition-all",
-                        isToday
-                          ? "border-primary/40 bg-primary/10 shadow-[0_0_12px_rgba(201,169,110,0.15)]"
-                          : "border-white/[0.07] bg-card hover:border-primary/30"
-                      )}
-                    >
-                      <span className="text-[10px] text-white/30 uppercase tracking-wide">
-                        {d.toLocaleDateString("pt-BR", { weekday: "short" })}
-                      </span>
-                      <span className={cn("text-xl font-heading font-bold mt-0.5", isToday ? "text-primary" : "text-foreground")}>
-                        {d.getDate()}
-                      </span>
-                      <span className="text-[10px] text-white/30">
-                        {d.toLocaleDateString("pt-BR", { month: "short" })}
-                      </span>
-                    </motion.button>
-                  );
-                })}
-              </div>
-              <button onClick={() => setStep(2)} className="flex items-center gap-1 text-sm text-white/30 hover:text-white/60 transition-colors">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                Voltar
-              </button>
-            </div>
-          )}
 
-          {/* Step 4 — Time */}
-          {step === 4 && (
-            <div className="space-y-4">
-              <div>
-                <p className="text-base font-semibold text-foreground">Escolha o horário</p>
-                <p className="text-xs text-white/40 mt-0.5 capitalize">
-                  {selectedDate?.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
-                </p>
-              </div>
-              {loadingSlots ? (
-                <div className="grid grid-cols-4 gap-2">
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="rounded-xl border border-white/[0.06] bg-card/50 h-11 animate-pulse" />
-                  ))}
-                </div>
-              ) : slots.length === 0 ? (
-                <div className="space-y-3">
-                  <p className="text-sm text-white/30">Sem horários disponíveis nesta data.</p>
-                  <button onClick={() => setStep(3)} className="text-sm text-primary font-medium">← Escolher outra data</button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                  {slots.map((t) => (
-                    <motion.button
-                      key={t}
-                      onClick={() => selectTime(t)}
-                      whileTap={{ scale: 0.93 }}
-                      className="rounded-xl border border-white/[0.07] bg-card h-11 text-sm font-semibold text-foreground hover:border-primary hover:text-primary hover:bg-primary/5 transition-all"
-                    >
-                      {t}
-                    </motion.button>
-                  ))}
+              {/* Quick slots */}
+              {(loadingQuick || quickSlots.length > 0) && (
+                <div>
+                  <p className="text-xs text-white/40 mb-2 flex items-center gap-1.5">
+                    <Zap className="w-3 h-3 text-primary" /> Próximos disponíveis
+                  </p>
+                  {loadingQuick ? (
+                    <div className="flex gap-2">
+                      {[1, 2, 3].map(i => <div key={i} className="h-8 w-28 rounded-lg bg-card border border-white/[0.06] animate-pulse" />)}
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {quickSlots.map(({ date, time }, i) => (
+                        <motion.button
+                          key={i}
+                          onClick={() => quickSelect(date, time)}
+                          whileTap={{ scale: 0.94 }}
+                          className="px-3 py-1.5 rounded-lg border border-primary/25 bg-primary/8 text-xs font-medium text-primary hover:bg-primary/15 transition-all flex items-center gap-1"
+                        >
+                          <Zap className="w-2.5 h-2.5" />
+                          {isToday(date) ? "Hoje" : isTomorrow(date) ? "Amanhã" : date.toLocaleDateString("pt-BR", { day: "numeric", month: "short" })} às {time}
+                        </motion.button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
-              <button onClick={() => setStep(3)} className="flex items-center gap-1 text-sm text-white/30 hover:text-white/60 transition-colors">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                Voltar
+
+              {/* Horizontal weekly calendar */}
+              <div>
+                <p className="text-xs text-white/40 mb-2">Escolha a data</p>
+                <div className="flex gap-2 overflow-x-auto pb-1.5 -mx-1 px-1 scrollbar-hide">
+                  {dateOptions.slice(0, 14).map((d) => {
+                    const isSel = selectedDate?.toDateString() === d.toDateString();
+                    const isTod = isToday(d);
+                    return (
+                      <motion.button
+                        key={d.toISOString()}
+                        onClick={() => pickDate(d)}
+                        whileTap={{ scale: 0.93 }}
+                        className={cn(
+                          "flex flex-col items-center gap-0.5 rounded-xl px-3 py-2.5 min-w-[52px] shrink-0 border transition-all",
+                          isSel
+                            ? "bg-primary/15 border-primary/40 glow-gold-xs"
+                            : isTod
+                            ? "border-primary/20 bg-primary/5"
+                            : "border-white/[0.06] bg-card hover:border-white/10"
+                        )}
+                      >
+                        <span className={cn(
+                          "text-[10px] uppercase tracking-wide font-medium",
+                          isSel ? "text-primary" : isTod ? "text-primary/70" : "text-white/30"
+                        )}>
+                          {d.toLocaleDateString("pt-BR", { weekday: "short" })}
+                        </span>
+                        <span className={cn(
+                          "text-xl font-heading font-semibold leading-none tracking-tight",
+                          isSel ? "text-primary" : "text-foreground"
+                        )}>
+                          {d.getDate()}
+                        </span>
+                        <span className={cn(
+                          "text-[10px]",
+                          isSel ? "text-primary/70" : "text-white/25"
+                        )}>
+                          {d.toLocaleDateString("pt-BR", { month: "short" })}
+                        </span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Slots expand below selected date */}
+              <AnimatePresence>
+                {selectedDate && (
+                  <motion.div
+                    key={selectedDate.toISOString()}
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-3"
+                  >
+                    <p className="text-xs text-white/40 capitalize">
+                      {selectedDate.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
+                    </p>
+                    {loadingSlots ? (
+                      <div className="grid grid-cols-4 gap-2">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="rounded-xl border border-white/[0.06] bg-card/50 h-11 animate-pulse" />
+                        ))}
+                      </div>
+                    ) : slots.length === 0 ? (
+                      <p className="text-sm text-white/30 py-2">Sem horários disponíveis nesta data.</p>
+                    ) : (
+                      <div className="grid grid-cols-4 gap-2">
+                        {slots.map((t) => (
+                          <motion.button
+                            key={t}
+                            onClick={() => selectTime(t)}
+                            whileTap={{ scale: 0.93 }}
+                            className="rounded-xl border border-white/[0.07] bg-card h-11 text-sm font-semibold tabular-nums text-foreground hover:border-primary hover:text-primary hover:bg-primary/5 transition-all"
+                          >
+                            {t}
+                          </motion.button>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <button onClick={() => setStep(2)} className="flex items-center gap-1 text-sm text-white/30 hover:text-white/60 transition-colors">
+                <ChevronLeft className="w-4 h-4" /> Voltar
               </button>
             </div>
           )}
 
-          {/* Step 5 — Confirm */}
-          {step === 5 && selectedBarber && selectedService && selectedDate && selectedTime && (
+          {/* Step 4 — Confirm */}
+          {step === 4 && selectedBarber && selectedService && selectedDate && selectedTime && (
             <div className="space-y-4">
               <div>
                 <p className="text-base font-semibold text-foreground">Confirme seu agendamento</p>
@@ -399,14 +478,20 @@ export default function SchedulePage() {
                     ].map(([label, value]) => (
                       <div key={label} className="flex justify-between items-center">
                         <span className="text-white/40">{label}</span>
-                        <span className="font-medium text-foreground">{value}</span>
+                        <span className="font-medium text-foreground tabular-nums">{value}</span>
                       </div>
                     ))}
                     <div className="flex justify-between items-center pt-2.5 border-t border-white/[0.06]">
                       <span className="text-white/40">Valor</span>
-                      <span className="font-heading text-lg font-bold text-primary">
-                        {isVip ? "Grátis ♛" : `R$ ${selectedService.price.toFixed(2)}`}
-                      </span>
+                      {isVip ? (
+                        <span className="font-heading text-lg font-semibold tracking-tight text-primary flex items-center gap-1.5">
+                          Grátis <Crown className="w-4 h-4" />
+                        </span>
+                      ) : (
+                        <span className="font-heading text-lg font-semibold tracking-tight text-primary">
+                          R$ {selectedService.price.toFixed(2)}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -422,9 +507,8 @@ export default function SchedulePage() {
               >
                 {booking ? "Confirmando..." : "CONFIRMAR AGENDAMENTO"}
               </motion.button>
-              <button onClick={() => setStep(4)} className="w-full flex items-center justify-center gap-1 text-sm text-white/30 hover:text-white/60 transition-colors">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                Voltar
+              <button onClick={() => setStep(3)} className="w-full flex items-center justify-center gap-1 text-sm text-white/30 hover:text-white/60 transition-colors">
+                <ChevronLeft className="w-4 h-4" /> Voltar
               </button>
             </div>
           )}

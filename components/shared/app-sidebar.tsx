@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { Crown } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { UserRole } from "@/types/database";
 import { cn } from "@/lib/utils";
@@ -139,7 +140,9 @@ export function AppSidebar({ role, fullName, avatarUrl, isVip, className, onClos
                 ? "text-primary bg-primary/15 border border-primary/25"
                 : "text-muted-foreground bg-white/5 border border-white/10"
             )}>
-              {isVip ? "♛ CLIENTE VIP" : role === "barber" ? "BARBEIRO" : role === "owner" ? "PROPRIETÁRIO" : role === "admin" ? "ADMIN" : "CLIENTE"}
+              {isVip ? (
+                <span className="flex items-center gap-0.5"><Crown className="w-2.5 h-2.5" /> CLIENTE VIP</span>
+              ) : role === "barber" ? "BARBEIRO" : role === "owner" ? "PROPRIETÁRIO" : role === "admin" ? "ADMIN" : "CLIENTE"}
             </span>
           </div>
         </div>
@@ -179,7 +182,7 @@ export function AppSidebar({ role, fullName, avatarUrl, isVip, className, onClos
             href="/client/subscription"
             className="flex items-center justify-center gap-1.5 w-full rounded-lg bg-primary text-background text-[11px] font-bold py-2 hover:bg-primary/90 transition-colors"
           >
-            ♛ QUERO SER VIP
+            <Crown className="w-3 h-3" /> QUERO SER VIP
           </Link>
         </div>
       )}

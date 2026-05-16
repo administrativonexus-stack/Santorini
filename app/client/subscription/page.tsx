@@ -3,16 +3,36 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { Crown, Star, Check } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { fadeUp, stagger } from "@/lib/motion";
 
 const BENEFITS = [
-  { icon: "✂", label: "Cortes ilimitados", desc: "Venha quantas vezes quiser no mês" },
-  { icon: "⚡", label: "Prioridade total", desc: "Acesso aos melhores horários" },
-  { icon: "⭐", label: "Horários exclusivos", desc: "Janelas reservadas para membros VIP" },
-  { icon: "♛", label: "Experiência premium", desc: "Atendimento diferenciado e prioritário" },
+  { icon: "scissors", label: "Cortes ilimitados", desc: "Venha quantas vezes quiser no mês" },
+  { icon: "zap",      label: "Prioridade total",  desc: "Acesso aos melhores horários" },
+  { icon: "clock",    label: "Horários exclusivos", desc: "Janelas reservadas para membros VIP" },
+  { icon: "crown",    label: "Experiência premium", desc: "Atendimento diferenciado e prioritário" },
 ];
+
+function BenefitIcon({ icon }: { icon: string }) {
+  if (icon === "scissors") return (
+    <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round">
+      <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/>
+    </svg>
+  );
+  if (icon === "zap") return (
+    <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+    </svg>
+  );
+  if (icon === "clock") return (
+    <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round">
+      <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
+    </svg>
+  );
+  return <Crown className="w-4 h-4 text-primary" />;
+}
 
 const TESTIMONIALS = [
   { name: "Ricardo M.", text: "Melhor custo-benefício da cidade. Vale muito a pena!", stars: 5 },
@@ -63,10 +83,8 @@ export default function SubscriptionPage() {
         style={{ background: "linear-gradient(135deg, rgba(201,169,110,0.08) 0%, rgba(10,10,10,0) 60%)" }}
       >
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
-        <div className="absolute top-4 right-4 opacity-10">
-          <svg viewBox="0 0 80 80" className="w-20 h-20 text-primary" fill="currentColor">
-            <path d="M40 5L10 20v20l30 15 30-15V20L40 5z" opacity={0.5}/>
-          </svg>
+        <div className="absolute top-4 right-4 opacity-8">
+          <Crown className="w-20 h-20 text-primary" />
         </div>
 
         <div className="p-6 relative space-y-5">
@@ -76,11 +94,11 @@ export default function SubscriptionPage() {
               <h1 className="font-heading text-2xl font-bold text-primary tracking-wider">VIP BARBERFLIX</h1>
               <p className="text-sm text-white/40 mt-0.5">Barbearia Santorini</p>
             </div>
-            <span className="text-4xl">♛</span>
+            <Crown className="w-8 h-8 text-primary/80 shrink-0" />
           </div>
 
           <div className="flex items-end gap-0.5">
-            <span className="font-heading text-5xl font-bold text-foreground leading-none">89</span>
+            <span className="font-heading text-5xl font-bold text-foreground leading-none tracking-tight">89</span>
             <div className="mb-1.5">
               <span className="text-xl font-bold text-foreground">,90</span>
               <span className="text-sm text-white/40 block leading-none">/mês</span>
@@ -99,7 +117,7 @@ export default function SubscriptionPage() {
               {subscription?.current_period_end && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-white/40">Próxima cobrança</span>
-                  <span className="text-foreground font-medium">
+                  <span className="text-foreground font-medium font-num">
                     {new Date(subscription.current_period_end).toLocaleDateString("pt-BR")}
                   </span>
                 </div>
@@ -107,9 +125,9 @@ export default function SubscriptionPage() {
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 disabled
-                className="w-full h-11 rounded-xl border border-primary/20 bg-primary/10 text-primary font-semibold text-sm opacity-70 cursor-not-allowed"
+                className="w-full h-11 rounded-xl border border-primary/20 bg-primary/10 text-primary font-semibold text-sm opacity-70 cursor-not-allowed flex items-center justify-center gap-2"
               >
-                ♛ Assinatura ativa
+                <Crown className="w-4 h-4" /> Assinatura ativa
               </motion.button>
             </div>
           ) : (
@@ -119,9 +137,9 @@ export default function SubscriptionPage() {
                 <Link
                   href="https://wa.me/"
                   target="_blank"
-                  className={cn(buttonVariants(), "w-full justify-center h-11 font-bold tracking-wide")}
+                  className={cn(buttonVariants(), "w-full justify-center h-11 font-bold tracking-wide gap-2")}
                 >
-                  ♛ ASSINAR AGORA
+                  <Crown className="w-4 h-4" /> ASSINAR AGORA
                 </Link>
               </motion.div>
             </div>
@@ -147,8 +165,8 @@ export default function SubscriptionPage() {
               variants={fadeUp}
               className="rounded-2xl border border-white/[0.06] bg-card p-4 space-y-2"
             >
-              <div className="h-9 w-9 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center text-base">
-                {b.icon}
+              <div className="h-9 w-9 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center">
+                <BenefitIcon icon={b.icon} />
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground">{b.label}</p>
@@ -166,7 +184,7 @@ export default function SubscriptionPage() {
           <div key={t.name} className="rounded-2xl border border-white/[0.06] bg-card p-4 space-y-2">
             <div className="flex gap-0.5">
               {Array.from({ length: t.stars }).map((_, i) => (
-                <span key={i} className="text-amber-400 text-sm">★</span>
+                <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
               ))}
             </div>
             <p className="text-sm text-white/70 italic">"{t.text}"</p>
