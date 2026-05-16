@@ -63,25 +63,26 @@ export async function PATCH(req: NextRequest) {
 
   if (upErr) return NextResponse.json({ error: upErr.message }, { status: 500 });
 
-  // WhatsApp notifications (fire and forget)
   const svcName = (apt.services as { name: string } | null)?.name ?? "Serviço";
   const date = fmtDate(apt.scheduled_at);
   const time = fmtTime(apt.scheduled_at);
   const clientProfile = apt.profiles as { full_name: string; phone: string | null } | null;
   const barberProfile = (apt.barbers as { profiles: { full_name: string; phone: string | null } | null } | null)?.profiles;
 
-  if (clientProfile?.phone) {
-    sendWhatsApp(
-      clientProfile.phone,
-      `❌ *Agendamento cancelado*\n\nSeu agendamento de *${svcName}* em ${date} às ${time} foi cancelado.\n\nPara reagendar acesse o app. Barbearia Santorini 💈`
-    );
-  }
-  if (barberProfile?.phone) {
-    sendWhatsApp(
-      barberProfile.phone,
-      `❌ *Agendamento cancelado*\n\nO cliente *${clientProfile?.full_name ?? "—"}* cancelou o agendamento de ${svcName} em ${date} às ${time}.`
-    );
-  }
+  await Promise.all([
+    clientProfile?.phone
+      ? sendWhatsApp(
+          clientProfile.phone,
+          `❌ *Agendamento cancelado*\n\nSeu agendamento de *${svcName}* em ${date} às ${time} foi cancelado.\n\nPara reagendar acesse o app. Barbearia Santorini 💈`
+        )
+      : Promise.resolve(),
+    barberProfile?.phone
+      ? sendWhatsApp(
+          barberProfile.phone,
+          `❌ *Agendamento cancelado*\n\nO cliente *${clientProfile?.full_name ?? "—"}* cancelou o agendamento de ${svcName} em ${date} às ${time}.`
+        )
+      : Promise.resolve(),
+  ]);
 
   return NextResponse.json({ ok: true });
 }
@@ -170,18 +171,20 @@ export async function POST(req: NextRequest) {
   const date = fmtDate(scheduledAt);
   const time = fmtTime(scheduledAt);
 
-  if (clientProfile?.phone) {
-    sendWhatsApp(
-      clientProfile.phone,
-      `✅ *Agendamento confirmado!*\n\n📋 Serviço: ${svcName}\n✂️ Barbeiro: ${barberProfile?.full_name ?? "—"}\n📅 ${date}\n⏰ ${time}\n\nBarbearia Santorini 💈`
-    );
-  }
-  if (barberProfile?.phone) {
-    sendWhatsApp(
-      barberProfile.phone,
-      `📅 *Novo agendamento!*\n\n👤 Cliente: ${clientProfile?.full_name ?? "—"}\n📋 Serviço: ${svcName}\n📅 ${date}\n⏰ ${time}`
-    );
-  }
+  await Promise.all([
+    clientProfile?.phone
+      ? sendWhatsApp(
+          clientProfile.phone,
+          `✅ *Agendamento confirmado!*\n\n📋 Serviço: ${svcName}\n✂️ Barbeiro: ${barberProfile?.full_name ?? "—"}\n📅 ${date}\n⏰ ${time}\n\nBarbearia Santorini 💈`
+        )
+      : Promise.resolve(),
+    barberProfile?.phone
+      ? sendWhatsApp(
+          barberProfile.phone,
+          `📅 *Novo agendamento!*\n\n👤 Cliente: ${clientProfile?.full_name ?? "—"}\n📋 Serviço: ${svcName}\n📅 ${date}\n⏰ ${time}`
+        )
+      : Promise.resolve(),
+  ]);
 
   return NextResponse.json({ ok: true }, { status: 201 });
 }
