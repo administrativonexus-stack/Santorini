@@ -132,3 +132,15 @@
     font-family: var(--font-heading);
   }
 }
+
+@layer utilities {
+  .glow-gold {
+    box-shadow: 0 0 16px oklch(0.72 0.09 72 / 35%);
+  }
+  .glow-gold-sm {
+    box-shadow: 0 0 8px oklch(0.72 0.09 72 / 25%);
+  }
+  .glow-gold-xs {
+    box-shadow: 0 0 4px oklch(0.72 0.09 72 / 20%);
+  }
+}

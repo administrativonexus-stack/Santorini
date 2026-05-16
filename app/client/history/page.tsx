@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -14,13 +14,13 @@ const STATUS_LABEL: Record<string, string> = {
   no_show: "Não compareceu",
 };
 
-const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  pending: "default",
-  confirmed: "default",
-  in_progress: "default",
-  completed: "outline",
-  cancelled: "destructive",
-  no_show: "destructive",
+const STATUS_DOT: Record<string, string> = {
+  pending: "bg-primary",
+  confirmed: "bg-primary",
+  in_progress: "bg-blue-400",
+  completed: "bg-muted-foreground",
+  cancelled: "bg-destructive",
+  no_show: "bg-destructive",
 };
 
 interface AptRow {
@@ -47,10 +47,18 @@ function displayLabel(apt: AptRow): string {
     apt.status !== "completed" &&
     apt.status !== "no_show" &&
     new Date(apt.ends_at) < new Date()
-  ) {
-    return "Concluído";
-  }
+  ) return "Concluído";
   return STATUS_LABEL[apt.status] ?? apt.status;
+}
+
+function displayDot(apt: AptRow): string {
+  if (
+    apt.status !== "cancelled" &&
+    apt.status !== "completed" &&
+    apt.status !== "no_show" &&
+    new Date(apt.ends_at) < new Date()
+  ) return "bg-muted-foreground";
+  return STATUS_DOT[apt.status] ?? "bg-muted";
 }
 
 function displayVariant(apt: AptRow): "default" | "secondary" | "destructive" | "outline" {
@@ -59,10 +67,10 @@ function displayVariant(apt: AptRow): "default" | "secondary" | "destructive" | 
     apt.status !== "completed" &&
     apt.status !== "no_show" &&
     new Date(apt.ends_at) < new Date()
-  ) {
-    return "outline";
-  }
-  return STATUS_VARIANT[apt.status] ?? "secondary";
+  ) return "outline";
+  if (apt.status === "pending" || apt.status === "confirmed" || apt.status === "in_progress") return "default";
+  if (apt.status === "cancelled" || apt.status === "no_show") return "destructive";
+  return "outline";
 }
 
 export default function HistoryPage() {
@@ -104,30 +112,36 @@ export default function HistoryPage() {
   const upcoming = visible.filter((a) => !isPast(a));
   const previous = visible.filter((a) => isPast(a));
   const list = tab === "upcoming" ? upcoming : previous;
+  const totalVisits = visible.filter((a) => isPast(a)).length;
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-5 max-w-lg mx-auto">
+      {/* Header */}
       <div>
-        <h1 className="font-heading text-3xl font-bold text-foreground">Histórico</h1>
-        <p className="text-muted-foreground mt-1">Seus agendamentos.</p>
+        <h1 className="font-heading text-2xl font-bold text-foreground">Histórico</h1>
+        {totalVisits > 0 && (
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {totalVisits} {totalVisits === 1 ? "visita" : "visitas"} na Barbearia Santorini
+          </p>
+        )}
       </div>
 
-      {/* Tab selector */}
-      <div className="flex gap-1 border border-border rounded-lg p-1 w-fit">
+      {/* Tabs */}
+      <div className="flex p-1 bg-card border border-border rounded-xl gap-1">
         <button
           onClick={() => setTab("upcoming")}
           className={cn(
-            "px-4 py-1.5 rounded-md text-sm font-medium transition-colors",
+            "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all duration-200",
             tab === "upcoming"
-              ? "bg-primary text-background"
+              ? "bg-primary text-background shadow-sm"
               : "text-muted-foreground hover:text-foreground"
           )}
         >
           Agendamentos
           {upcoming.length > 0 && (
             <span className={cn(
-              "ml-1.5 text-xs rounded-full px-1.5 py-0.5",
-              tab === "upcoming" ? "bg-background/20" : "bg-primary/20 text-primary"
+              "text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold",
+              tab === "upcoming" ? "bg-background/25 text-background" : "bg-primary/20 text-primary"
             )}>
               {upcoming.length}
             </span>
@@ -136,9 +150,9 @@ export default function HistoryPage() {
         <button
           onClick={() => setTab("previous")}
           className={cn(
-            "px-4 py-1.5 rounded-md text-sm font-medium transition-colors",
+            "flex-1 py-2 rounded-lg text-sm font-medium transition-all duration-200",
             tab === "previous"
-              ? "bg-primary text-background"
+              ? "bg-primary text-background shadow-sm"
               : "text-muted-foreground hover:text-foreground"
           )}
         >
@@ -148,12 +162,17 @@ export default function HistoryPage() {
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
+      {/* List */}
       {list.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center">
-          <p className="text-muted-foreground text-sm">
-            {tab === "upcoming"
-              ? "Nenhum agendamento ativo."
-              : "Nenhum agendamento anterior."}
+        <div className="rounded-2xl border border-border bg-card p-10 text-center space-y-2">
+          <p className="text-2xl">
+            {tab === "upcoming" ? "📅" : "🕐"}
+          </p>
+          <p className="text-sm font-medium text-foreground">
+            {tab === "upcoming" ? "Nenhum agendamento ativo" : "Nenhuma visita anterior"}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {tab === "upcoming" ? "Agende seu próximo corte" : "Suas visitas aparecerão aqui"}
           </p>
         </div>
       ) : (
@@ -161,44 +180,57 @@ export default function HistoryPage() {
           {list.map((apt) => {
             const barberName =
               (apt.barbers?.profiles as { full_name: string } | null)?.full_name ?? "—";
+            const isActive = tab === "upcoming";
             return (
-              <div key={apt.id} className="rounded-xl border border-border bg-card px-5 py-4 space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-foreground">{apt.services?.name}</p>
-                    <p className="text-sm text-muted-foreground mt-0.5">com {barberName}</p>
+              <div
+                key={apt.id}
+                className={cn(
+                  "rounded-2xl border bg-card px-5 py-4 space-y-3 relative overflow-hidden transition-all",
+                  isActive ? "border-border hover:border-primary/30" : "border-border/50 opacity-85"
+                )}
+              >
+                {/* Status accent line */}
+                <div className={cn("absolute left-0 top-4 bottom-4 w-0.5 rounded-full", displayDot(apt))} />
+
+                <div className="flex items-start justify-between gap-3 pl-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-foreground">{apt.services?.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">com {barberName}</p>
                   </div>
-                  <Badge variant={displayVariant(apt)}>
+                  <Badge variant={displayVariant(apt)} className="shrink-0 text-xs">
                     {displayLabel(apt)}
                   </Badge>
                 </div>
-                <div className="flex flex-wrap gap-2 sm:gap-5 text-xs text-muted-foreground">
-                  <span>
+
+                <div className="pl-3 flex items-center gap-3 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                    </svg>
                     {new Date(apt.scheduled_at).toLocaleDateString("pt-BR", {
-                      weekday: "long", day: "numeric", month: "long", year: "numeric",
+                      weekday: "short", day: "numeric", month: "short",
                     })}
                   </span>
-                  <span>
+                  <span className="flex items-center gap-1">
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3" strokeLinecap="round"/>
+                    </svg>
                     {new Date(apt.scheduled_at).toLocaleTimeString("pt-BR", {
                       hour: "2-digit", minute: "2-digit",
                     })}
                   </span>
-                  {apt.price_paid !== null && (
-                    <span className="text-primary font-medium">
-                      {apt.price_paid === 0 ? "Grátis (VIP)" : `R$ ${Number(apt.price_paid).toFixed(2)}`}
-                    </span>
-                  )}
                 </div>
-                {tab === "upcoming" && canCancel(apt) && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => cancel(apt.id)}
-                    disabled={cancelling === apt.id}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 px-2 text-xs"
-                  >
-                    {cancelling === apt.id ? "Cancelando..." : "Cancelar"}
-                  </Button>
+
+                {isActive && canCancel(apt) && (
+                  <div className="pl-3">
+                    <button
+                      onClick={() => cancel(apt.id)}
+                      disabled={cancelling === apt.id}
+                      className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                      {cancelling === apt.id ? "Cancelando..." : "Cancelar agendamento"}
+                    </button>
+                  </div>
                 )}
               </div>
             );

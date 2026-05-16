@@ -32,18 +32,17 @@ export default function ProfilePage() {
     setLoading(true);
     setError("");
     setSaved(false);
-
     const res = await fetch("/api/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ full_name: fullName, phone }),
     });
-
     const json = await res.json();
     if (!res.ok) {
       setError(json.error ?? "Erro ao salvar.");
     } else {
       setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     }
     setLoading(false);
   }
@@ -51,18 +50,11 @@ export default function ProfilePage() {
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setUploading(true);
     setError("");
-
     const formData = new FormData();
     formData.append("file", file);
-
-    const res = await fetch("/api/profile/avatar", {
-      method: "POST",
-      body: formData,
-    });
-
+    const res = await fetch("/api/profile/avatar", { method: "POST", body: formData });
     const json = await res.json();
     if (!res.ok) {
       setError(json.error ?? "Erro ao enviar foto.");
@@ -80,35 +72,43 @@ export default function ProfilePage() {
     .toUpperCase();
 
   return (
-    <div className="max-w-md space-y-6">
-      <div>
-        <h1 className="font-heading text-3xl font-bold text-foreground">Perfil</h1>
-        <p className="text-muted-foreground mt-1">Gerencie suas informações pessoais.</p>
-      </div>
+    <div className="max-w-md mx-auto space-y-6">
 
-      <div className="flex items-center gap-4">
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt="Avatar"
-            className="h-16 w-16 rounded-full object-cover border border-border"
-          />
-        ) : (
-          <div className="h-16 w-16 rounded-full bg-primary/20 border border-border flex items-center justify-center text-primary font-heading font-bold text-xl">
-            {initials || "?"}
-          </div>
-        )}
-        <div>
-          <Button
-            variant="outline"
-            size="sm"
+      {/* Avatar section */}
+      <div className="flex flex-col items-center pt-4 pb-2 space-y-3">
+        <div className="relative">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="Avatar"
+              className="h-24 w-24 rounded-full object-cover border-2 border-primary/40 glow-gold-sm"
+            />
+          ) : (
+            <div className="h-24 w-24 rounded-full bg-primary/15 border-2 border-primary/30 flex items-center justify-center text-primary font-heading font-bold text-2xl glow-gold-xs">
+              {initials || "?"}
+            </div>
+          )}
+          <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
+            className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-primary flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors"
+            aria-label="Trocar foto"
           >
-            {uploading ? "Enviando..." : "Trocar foto"}
-          </Button>
-          <p className="text-xs text-muted-foreground mt-1">JPG, PNG ou WebP. Máx 5MB.</p>
+            {uploading ? (
+              <div className="h-3.5 w-3.5 border-2 border-background/50 border-t-background rounded-full animate-spin" />
+            ) : (
+              <svg className="w-3.5 h-3.5 text-background" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+          </button>
         </div>
+
+        <div className="text-center">
+          <p className="font-heading text-xl font-bold text-foreground">{fullName || "Seu nome"}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Cliente · Barbearia Santorini</p>
+        </div>
+
         <input
           ref={fileInputRef}
           type="file"
@@ -118,36 +118,56 @@ export default function ProfilePage() {
         />
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-6">
+      {/* Form */}
+      <div className="rounded-2xl border border-border bg-card p-6">
+        <p className="text-xs text-muted-foreground uppercase tracking-[0.15em] mb-4">Informações pessoais</p>
         <form onSubmit={handleSave} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="fullName">Nome completo</Label>
+            <Label htmlFor="fullName" className="text-xs text-muted-foreground uppercase tracking-wide">
+              Nome completo
+            </Label>
             <Input
               id="fullName"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
+              className="h-11"
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="phone">Telefone</Label>
+            <Label htmlFor="phone" className="text-xs text-muted-foreground uppercase tracking-wide">
+              WhatsApp
+            </Label>
             <Input
               id="phone"
               type="tel"
-              placeholder="+55 11 99999-9999"
+              placeholder="+55 37 99999-9999"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              className="h-11"
             />
           </div>
+
           {error && <p className="text-sm text-destructive">{error}</p>}
           {saved && (
-            <p className="text-sm text-primary">Perfil atualizado com sucesso.</p>
+            <p className="text-sm text-primary flex items-center gap-1.5">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Perfil atualizado com sucesso
+            </p>
           )}
-          <Button type="submit" disabled={loading}>
+
+          <Button type="submit" className="w-full h-11" disabled={loading}>
             {loading ? "Salvando..." : "Salvar alterações"}
           </Button>
         </form>
       </div>
+
+      {/* Photo tip */}
+      <p className="text-center text-xs text-muted-foreground">
+        Foto aceita JPG, PNG ou WebP · Máx 5MB
+      </p>
     </div>
   );
 }
