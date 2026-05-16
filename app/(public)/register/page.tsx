@@ -21,6 +21,7 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -47,7 +48,7 @@ export default function RegisterPage() {
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: { full_name: fullName, phone: phone || null },
         emailRedirectTo: `${window.location.origin}/api/auth/callback`,
       },
     });
@@ -127,6 +128,17 @@ export default function RegisterPage() {
                 onChange={(e) => setFullName(e.target.value)}
                 required
                 autoComplete="name"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="phone">Telefone (WhatsApp)</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+55 37 99999-9999"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                autoComplete="tel"
               />
             </div>
             <div className="space-y-1.5">
