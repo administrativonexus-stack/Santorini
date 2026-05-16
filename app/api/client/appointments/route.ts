@@ -151,44 +151,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Fetch full details for WhatsApp notification
-  const { data: full } = await admin
-    .from("appointments")
-    .select(`
-      scheduled_at,
-      services ( name ),
-      profiles!appointments_client_id_fkey ( full_name, phone ),
-      barbers ( profiles!barbers_profile_id_fkey ( full_name, phone ) )
-    `)
-    .eq("client_id", session.user.id)
-    .eq("barber_id", barberId)
-    .eq("scheduled_at", scheduledAt)
-    .single();
+  // Fetch data separately for WhatsApp — simpler than complex joins
+  const [
+    { data: clientProfile },
+    { data: barberRow },
+    { data: serviceRow },
+  ] = await Promise.all([
+    admin.from("profiles").select("full_name, phone").eq("id", session.user.id).single(),
+    admin.from("barbers").select("profile_id").eq("id", barberId).single(),
+    admin.from("services").select("name").eq("id", serviceId).single(),
+  ]);
 
-  if (!full) {
-    console.warn("[WhatsApp] appointment details query returned null — notification skipped");
-  } else {
-    const svcName = (full.services as { name: string } | null)?.name ?? "Serviço";
-    const date = fmtDate(full.scheduled_at);
-    const time = fmtTime(full.scheduled_at);
-    const clientP = full.profiles as { full_name: string; phone: string | null } | null;
-    const barberP = (full.barbers as { profiles: { full_name: string; phone: string | null } | null } | null)?.profiles;
+  const barberProfile = barberRow
+    ? (await admin.from("profiles").select("full_name, phone").eq("id", barberRow.profile_id).single()).data
+    : null;
 
-    console.log("[WhatsApp] client phone:", clientP?.phone ?? "NULL");
-    console.log("[WhatsApp] barber phone:", barberP?.phone ?? "NULL");
+  const svcName = serviceRow?.name ?? "Serviço";
+  const date = fmtDate(scheduledAt);
+  const time = fmtTime(scheduledAt);
 
-    if (clientP?.phone) {
-      sendWhatsApp(
-        clientP.phone,
-        `✅ *Agendamento confirmado!*\n\n📋 Serviço: ${svcName}\n✂️ Barbeiro: ${barberP?.full_name ?? "—"}\n📅 ${date}\n⏰ ${time}\n\nBarbearia Santorini 💈`
-      );
-    }
-    if (barberP?.phone) {
-      sendWhatsApp(
-        barberP.phone,
-        `📅 *Novo agendamento!*\n\n👤 Cliente: ${clientP?.full_name ?? "—"}\n📋 Serviço: ${svcName}\n📅 ${date}\n⏰ ${time}`
-      );
-    }
+  console.log("[WhatsApp] client phone:", clientProfile?.phone ?? "NULL");
+  console.log("[WhatsApp] barber phone:", barberProfile?.phone ?? "NULL");
+
+  if (clientProfile?.phone) {
+    sendWhatsApp(
+      clientProfile.phone,
+      `✅ *Agendamento confirmado!*\n\n📋 Serviço: ${svcName}\n✂️ Barbeiro: ${barberProfile?.full_name ?? "—"}\n📅 ${date}\n⏰ ${time}\n\nBarbearia Santorini 💈`
+    );
+  }
+  if (barberProfile?.phone) {
+    sendWhatsApp(
+      barberProfile.phone,
+      `📅 *Novo agendamento!*\n\n👤 Cliente: ${clientProfile?.full_name ?? "—"}\n📋 Serviço: ${svcName}\n📅 ${date}\n⏰ ${time}`
+    );
   }
 
   return NextResponse.json({ ok: true }, { status: 201 });
