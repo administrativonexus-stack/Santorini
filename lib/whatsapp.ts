@@ -22,29 +22,18 @@ export async function sendWhatsApp(phone: string, text: string): Promise<void> {
   }
 
   const number = formatBRPhone(phone);
-  console.log("[WhatsApp] Sending to:", number);
 
-  try {
-    const res = await fetch(
-      `https://api.z-api.io/instances/${instanceId}/token/${token}/send-text`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Client-Token": clientToken ?? "",
-        },
-        body: JSON.stringify({ phone: number, message: text }),
-      }
-    );
-    const body = await res.text().catch(() => "");
-    if (!res.ok) {
-      console.error(`[WhatsApp] Z-API error ${res.status}:`, body);
-    } else {
-      console.log(`[WhatsApp] Sent OK ${res.status}:`, body.slice(0, 100));
+  await fetch(
+    `https://api.z-api.io/instances/${instanceId}/token/${token}/send-text`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Client-Token": clientToken ?? "",
+      },
+      body: JSON.stringify({ phone: number, message: text }),
     }
-  } catch (err) {
-    console.error("[WhatsApp] Network error:", err);
-  }
+  ).catch(() => {});
 }
 
 export function fmtDate(iso: string): string {

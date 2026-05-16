@@ -170,9 +170,6 @@ export async function POST(req: NextRequest) {
   const date = fmtDate(scheduledAt);
   const time = fmtTime(scheduledAt);
 
-  console.log("[WhatsApp] client phone:", clientProfile?.phone ?? "NULL");
-  console.log("[WhatsApp] barber phone:", barberProfile?.phone ?? "NULL");
-
   if (clientProfile?.phone) {
     sendWhatsApp(
       clientProfile.phone,
