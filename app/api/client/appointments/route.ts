@@ -165,12 +165,17 @@ export async function POST(req: NextRequest) {
     .eq("scheduled_at", scheduledAt)
     .single();
 
-  if (full) {
+  if (!full) {
+    console.warn("[WhatsApp] appointment details query returned null — notification skipped");
+  } else {
     const svcName = (full.services as { name: string } | null)?.name ?? "Serviço";
     const date = fmtDate(full.scheduled_at);
     const time = fmtTime(full.scheduled_at);
     const clientP = full.profiles as { full_name: string; phone: string | null } | null;
     const barberP = (full.barbers as { profiles: { full_name: string; phone: string | null } | null } | null)?.profiles;
+
+    console.log("[WhatsApp] client phone:", clientP?.phone ?? "NULL");
+    console.log("[WhatsApp] barber phone:", barberP?.phone ?? "NULL");
 
     if (clientP?.phone) {
       sendWhatsApp(
