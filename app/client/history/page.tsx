@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const STATUS_LABEL: Record<string, string> = {
-  pending: "Aguardando",
+  pending: "Agendado",
   confirmed: "Confirmado",
   in_progress: "Em andamento",
   completed: "Concluído",
@@ -14,7 +15,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  pending: "secondary",
+  pending: "default",
   confirmed: "default",
   in_progress: "default",
   completed: "outline",
@@ -32,8 +33,41 @@ interface AptRow {
   services: { name: string; duration_minutes: number } | null;
 }
 
+function isPast(apt: AptRow): boolean {
+  return (
+    apt.status === "completed" ||
+    apt.status === "no_show" ||
+    new Date(apt.ends_at) < new Date()
+  );
+}
+
+function displayLabel(apt: AptRow): string {
+  if (
+    apt.status !== "cancelled" &&
+    apt.status !== "completed" &&
+    apt.status !== "no_show" &&
+    new Date(apt.ends_at) < new Date()
+  ) {
+    return "Concluído";
+  }
+  return STATUS_LABEL[apt.status] ?? apt.status;
+}
+
+function displayVariant(apt: AptRow): "default" | "secondary" | "destructive" | "outline" {
+  if (
+    apt.status !== "cancelled" &&
+    apt.status !== "completed" &&
+    apt.status !== "no_show" &&
+    new Date(apt.ends_at) < new Date()
+  ) {
+    return "outline";
+  }
+  return STATUS_VARIANT[apt.status] ?? "secondary";
+}
+
 export default function HistoryPage() {
   const [appointments, setAppointments] = useState<AptRow[]>([]);
+  const [tab, setTab] = useState<"upcoming" | "previous">("upcoming");
   const [cancelling, setCancelling] = useState<string | null>(null);
   const [error, setError] = useState("");
 
@@ -50,13 +84,11 @@ export default function HistoryPage() {
     if (!confirm("Cancelar este agendamento?")) return;
     setCancelling(id);
     setError("");
-
     const res = await fetch("/api/client/appointments", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-
     const json = await res.json();
     setCancelling(null);
     if (!res.ok) { setError(json.error ?? "Erro ao cancelar."); return; }
@@ -68,33 +100,76 @@ export default function HistoryPage() {
     return new Date(apt.scheduled_at).getTime() - Date.now() > 2 * 60 * 60 * 1000;
   }
 
+  const visible = appointments.filter((a) => a.status !== "cancelled");
+  const upcoming = visible.filter((a) => !isPast(a));
+  const previous = visible.filter((a) => isPast(a));
+  const list = tab === "upcoming" ? upcoming : previous;
+
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
         <h1 className="font-heading text-3xl font-bold text-foreground">Histórico</h1>
-        <p className="text-muted-foreground mt-1">Todos os seus agendamentos.</p>
+        <p className="text-muted-foreground mt-1">Seus agendamentos.</p>
+      </div>
+
+      {/* Tab selector */}
+      <div className="flex gap-1 border border-border rounded-lg p-1 w-fit">
+        <button
+          onClick={() => setTab("upcoming")}
+          className={cn(
+            "px-4 py-1.5 rounded-md text-sm font-medium transition-colors",
+            tab === "upcoming"
+              ? "bg-primary text-background"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          Agendamentos
+          {upcoming.length > 0 && (
+            <span className={cn(
+              "ml-1.5 text-xs rounded-full px-1.5 py-0.5",
+              tab === "upcoming" ? "bg-background/20" : "bg-primary/20 text-primary"
+            )}>
+              {upcoming.length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setTab("previous")}
+          className={cn(
+            "px-4 py-1.5 rounded-md text-sm font-medium transition-colors",
+            tab === "previous"
+              ? "bg-primary text-background"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          Anteriores
+        </button>
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      {appointments.length === 0 ? (
+      {list.length === 0 ? (
         <div className="rounded-xl border border-border bg-card p-8 text-center">
-          <p className="text-muted-foreground text-sm">Você ainda não tem agendamentos.</p>
+          <p className="text-muted-foreground text-sm">
+            {tab === "upcoming"
+              ? "Nenhum agendamento ativo."
+              : "Nenhum agendamento anterior."}
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
-          {appointments.map((apt) => {
+          {list.map((apt) => {
             const barberName =
               (apt.barbers?.profiles as { full_name: string } | null)?.full_name ?? "—";
             return (
               <div key={apt.id} className="rounded-xl border border-border bg-card px-5 py-4 space-y-3">
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-medium text-foreground">{apt.services?.name}</p>
                     <p className="text-sm text-muted-foreground mt-0.5">com {barberName}</p>
                   </div>
-                  <Badge variant={STATUS_VARIANT[apt.status]}>
-                    {STATUS_LABEL[apt.status] ?? apt.status}
+                  <Badge variant={displayVariant(apt)}>
+                    {displayLabel(apt)}
                   </Badge>
                 </div>
                 <div className="flex flex-wrap gap-2 sm:gap-5 text-xs text-muted-foreground">
@@ -114,7 +189,7 @@ export default function HistoryPage() {
                     </span>
                   )}
                 </div>
-                {canCancel(apt) && (
+                {tab === "upcoming" && canCancel(apt) && (
                   <Button
                     size="sm"
                     variant="ghost"
