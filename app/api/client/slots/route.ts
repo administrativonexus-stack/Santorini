@@ -7,6 +7,8 @@ const JS_TO_DB_DAY: Record<number, DayOfWeek> = {
   0: "sun", 1: "mon", 2: "tue", 3: "wed", 4: "thu", 5: "fri", 6: "sat",
 };
 
+const TIMEZONE = "America/Sao_Paulo";
+
 function timeToMinutes(t: string): number {
   const [h, m] = t.split(":").map(Number);
   return h * 60 + m;
@@ -14,6 +16,20 @@ function timeToMinutes(t: string): number {
 
 function minutesToTime(m: number): string {
   return `${Math.floor(m / 60).toString().padStart(2, "0")}:${(m % 60).toString().padStart(2, "0")}`;
+}
+
+// Converts a UTC Date to local minutes (hours*60+minutes) in the barbershop timezone.
+// Avoids getHours()/getMinutes() which return UTC on a Node.js UTC server.
+function toLocalMinutes(utcDate: Date): number {
+  const parts = new Intl.DateTimeFormat("en", {
+    timeZone: TIMEZONE,
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+  }).formatToParts(utcDate);
+  const h = parseInt(parts.find((p) => p.type === "hour")?.value ?? "0");
+  const m = parseInt(parts.find((p) => p.type === "minute")?.value ?? "0");
+  return h * 60 + m;
 }
 
 export async function GET(req: NextRequest) {
@@ -67,19 +83,22 @@ export async function GET(req: NextRequest) {
 
   const busy: { start: number; end: number }[] = [];
   (existing ?? []).forEach((apt) => {
-    const s = new Date(apt.scheduled_at);
-    const e = new Date(apt.ends_at);
-    busy.push({ start: s.getHours() * 60 + s.getMinutes(), end: e.getHours() * 60 + e.getMinutes() });
+    busy.push({
+      start: toLocalMinutes(new Date(apt.scheduled_at)),
+      end: toLocalMinutes(new Date(apt.ends_at)),
+    });
   });
   (blocks ?? []).forEach((blk) => {
-    const s = new Date(blk.start_at);
-    const e = new Date(blk.end_at);
-    busy.push({ start: s.getHours() * 60 + s.getMinutes(), end: e.getHours() * 60 + e.getMinutes() });
+    busy.push({
+      start: toLocalMinutes(new Date(blk.start_at)),
+      end: toLocalMinutes(new Date(blk.end_at)),
+    });
   });
 
   const now = new Date();
-  const isToday = dateStr === now.toISOString().split("T")[0];
-  const nowMin = isToday ? now.getHours() * 60 + now.getMinutes() + 30 : 0;
+  const localDateStr = new Intl.DateTimeFormat("en-CA", { timeZone: TIMEZONE }).format(now);
+  const isToday = dateStr === localDateStr;
+  const nowMin = isToday ? toLocalMinutes(now) + 30 : 0;
 
   const slots: string[] = [];
   for (let t = startMin; t + duration <= endMin; t += duration) {
