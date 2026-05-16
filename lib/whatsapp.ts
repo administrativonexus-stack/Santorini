@@ -8,32 +8,27 @@ function formatBRPhone(phone: string): string {
 }
 
 export async function sendWhatsApp(phone: string, text: string): Promise<void> {
-  const instanceId = process.env.ZAPI_INSTANCE_ID;
-  const token = process.env.ZAPI_TOKEN;
-  const clientToken = process.env.ZAPI_CLIENT_TOKEN;
+  const token = process.env.FONNTE_TOKEN;
 
-  if (!instanceId || !token) {
-    console.warn("[WhatsApp] ZAPI env vars not set — skipping notification");
+  if (!token) {
+    console.warn("[WhatsApp] FONNTE_TOKEN not set — skipping notification");
     return;
   }
-  if (!phone) {
-    console.warn("[WhatsApp] No phone number — skipping notification");
-    return;
-  }
+  if (!phone) return;
 
   const number = formatBRPhone(phone);
 
-  await fetch(
-    `https://api.z-api.io/instances/${instanceId}/token/${token}/send-text`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Client-Token": clientToken ?? "",
-      },
-      body: JSON.stringify({ phone: number, message: text }),
-    }
-  ).catch(() => {});
+  await fetch("https://api.fonnte.com/send", {
+    method: "POST",
+    headers: {
+      "Authorization": token,
+    },
+    body: new URLSearchParams({
+      target: number,
+      message: text,
+      countryCode: "55",
+    }),
+  }).catch(() => {});
 }
 
 export function fmtDate(iso: string): string {
