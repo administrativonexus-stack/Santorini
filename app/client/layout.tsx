@@ -19,18 +19,22 @@ export default async function ClientLayout({
 
   // Use service role to bypass RLS for profile lookup
   const admin = createAdminClient();
-  const { data: profile } = await admin
-    .from("profiles")
-    .select("role, full_name")
-    .eq("id", session.user.id)
-    .single();
+  const [{ data: profile }, { data: subscription }] = await Promise.all([
+    admin.from("profiles").select("role, full_name, avatar_url").eq("id", session.user.id).single(),
+    admin.from("subscriptions").select("status").eq("client_id", session.user.id).eq("status", "active").maybeSingle(),
+  ]);
 
   if (!profile) redirect("/login");
   if (profile.role === "barber") redirect("/barber/dashboard");
   if (!["client", "owner", "admin"].includes(profile.role)) redirect("/login");
 
   return (
-    <DashboardShell role={profile.role} fullName={profile.full_name}>
+    <DashboardShell
+      role={profile.role}
+      fullName={profile.full_name}
+      avatarUrl={profile.avatar_url}
+      isVip={subscription?.status === "active"}
+    >
       {children}
     </DashboardShell>
   );
