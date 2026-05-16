@@ -17,18 +17,24 @@ export async function sendWhatsApp(phone: string, text: string): Promise<void> {
   if (!phone) return;
 
   const number = formatBRPhone(phone);
+  console.log("[WhatsApp] Sending to:", number);
 
-  await fetch("https://api.fonnte.com/send", {
-    method: "POST",
-    headers: {
-      "Authorization": token,
-    },
-    body: new URLSearchParams({
-      target: number,
-      message: text,
-      countryCode: "55",
-    }),
-  }).catch(() => {});
+  try {
+    const res = await fetch("https://api.fonnte.com/send", {
+      method: "POST",
+      headers: {
+        "Authorization": token,
+      },
+      body: new URLSearchParams({
+        target: number,
+        message: text,
+      }),
+    });
+    const body = await res.text().catch(() => "");
+    console.log(`[WhatsApp] Fonnte response ${res.status}:`, body.slice(0, 200));
+  } catch (err) {
+    console.error("[WhatsApp] Network error:", err);
+  }
 }
 
 export function fmtDate(iso: string): string {
