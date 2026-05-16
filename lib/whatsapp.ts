@@ -1,3 +1,5 @@
+const TIMEZONE = "America/Sao_Paulo";
+
 function formatBRPhone(phone: string): string {
   const digits = phone.replace(/\D/g, "");
   if (digits.startsWith("55") && digits.length >= 12) return digits;
@@ -9,7 +11,15 @@ export async function sendWhatsApp(phone: string, text: string): Promise<void> {
   const instanceId = process.env.ZAPI_INSTANCE_ID;
   const token = process.env.ZAPI_TOKEN;
   const clientToken = process.env.ZAPI_CLIENT_TOKEN;
-  if (!instanceId || !token || !phone) return;
+
+  if (!instanceId || !token) {
+    console.warn("[WhatsApp] ZAPI env vars not set — skipping notification");
+    return;
+  }
+  if (!phone) {
+    console.warn("[WhatsApp] No phone number — skipping notification");
+    return;
+  }
 
   const number = formatBRPhone(phone);
 
@@ -23,11 +33,14 @@ export async function sendWhatsApp(phone: string, text: string): Promise<void> {
       },
       body: JSON.stringify({ phone: number, message: text }),
     }
-  ).catch(() => {});
+  ).catch((err) => {
+    console.error("[WhatsApp] Send failed:", err);
+  });
 }
 
 export function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString("pt-BR", {
+    timeZone: TIMEZONE,
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -36,6 +49,7 @@ export function fmtDate(iso: string): string {
 
 export function fmtTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("pt-BR", {
+    timeZone: TIMEZONE,
     hour: "2-digit",
     minute: "2-digit",
   });
