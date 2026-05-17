@@ -138,9 +138,9 @@ export default function ServicesPage() {
         ) : (
           <div className="divide-y divide-border">
             {services.map((svc) => (
-              <div key={svc.id} className="flex items-center justify-between px-5 py-4">
+              <div key={svc.id} className="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-4 gap-3">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-medium text-foreground">{svc.name}</p>
                     <Badge variant={svc.is_active ? "default" : "secondary"}>
                       {svc.is_active ? "Ativo" : "Inativo"}
@@ -153,7 +153,7 @@ export default function ServicesPage() {
                     R$ {svc.price.toFixed(2)} · {svc.duration_minutes} min
                   </p>
                 </div>
-                <div className="flex items-center gap-2 ml-4 shrink-0">
+                <div className="flex items-center gap-2 shrink-0">
                   <Button size="sm" variant="ghost" onClick={() => toggleActive(svc)} className="text-xs text-muted-foreground">
                     {svc.is_active ? "Desativar" : "Ativar"}
                   </Button>
@@ -182,7 +182,7 @@ export default function ServicesPage() {
               <Label>Descrição</Label>
               <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Preço (R$)</Label>
                 <Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />

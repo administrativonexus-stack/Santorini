@@ -62,34 +62,34 @@ export default function LandingPage() {
       </header>
 
       {/* Hero */}
-      <section className="flex flex-1 flex-col items-center justify-center px-6 py-24 text-center">
+      <section className="flex flex-1 flex-col items-center justify-center px-6 py-16 sm:py-24 text-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="space-y-6 max-w-2xl"
+          className="space-y-6 max-w-2xl w-full"
         >
           <p className="text-xs tracking-[0.4em] text-muted-foreground uppercase">
             Barbearia Santorini
           </p>
-          <h1 className="font-heading text-6xl font-bold tracking-[0.15em] text-foreground md:text-8xl">
+          <h1 className="font-heading text-4xl sm:text-6xl md:text-8xl font-bold tracking-[0.15em] text-foreground">
             BARBER
             <span className="text-primary">FLIX</span>
           </h1>
-          <p className="text-lg text-muted-foreground leading-relaxed max-w-md mx-auto">
+          <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-md mx-auto">
             A experiência premium de agendamento e assinatura para quem valoriza
             estilo e tempo.
           </p>
-          <div className="flex items-center justify-center gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-4">
             <Link
               href="/register"
-              className={cn(buttonVariants({ size: "lg" }), "px-8")}
+              className={cn(buttonVariants({ size: "lg" }), "w-full sm:w-auto sm:px-8")}
             >
               Começar agora
             </Link>
             <Link
               href="/login"
-              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "px-8")}
+              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full sm:w-auto sm:px-8")}
             >
               Já tenho conta
             </Link>
@@ -137,12 +137,12 @@ export default function LandingPage() {
         transition={{ duration: 0.6 }}
         className="border-t border-border py-16 px-6 text-center space-y-5"
       >
-        <h2 className="font-heading text-3xl font-bold text-foreground">
+        <h2 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
           Seu próximo corte a um clique de distância.
         </h2>
         <Link
           href="/register"
-          className={cn(buttonVariants({ size: "lg" }), "px-10")}
+          className={cn(buttonVariants({ size: "lg" }), "w-full sm:w-auto sm:px-10")}
         >
           Assinar Plano VIP
         </Link>
