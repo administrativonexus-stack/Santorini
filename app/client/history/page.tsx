@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { fadeUp, stagger } from "@/lib/motion";
+import { fadeUp } from "@/lib/motion";
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "Agendado",
@@ -122,14 +122,9 @@ export default function HistoryPage() {
   }
 
   return (
-    <motion.div
-      className="max-w-2xl mx-auto space-y-5"
-      variants={stagger(0.08)}
-      initial="hidden"
-      animate="show"
-    >
+    <div className="max-w-2xl mx-auto space-y-5">
       {/* Header */}
-      <motion.div variants={fadeUp}>
+      <motion.div variants={fadeUp} initial="hidden" animate="show">
         <h1 className="font-heading text-[26px] font-bold text-foreground">Histórico</h1>
         {totalVisits > 0 && (
           <p className="text-sm text-white/40 mt-0.5">
@@ -139,7 +134,13 @@ export default function HistoryPage() {
       </motion.div>
 
       {/* Tabs */}
-      <motion.div variants={fadeUp} className="flex p-1 bg-card border border-white/[0.06] rounded-xl gap-1">
+      <motion.div
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+        transition={{ delay: 0.08 }}
+        className="flex p-1 bg-card border border-white/[0.06] rounded-xl gap-1"
+      >
         {(["upcoming", "previous"] as const).map((t) => (
           <button
             key={t}
@@ -168,9 +169,20 @@ export default function HistoryPage() {
 
       {/* List */}
       <AnimatePresence mode="wait">
-        <motion.div key={tab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+        >
           {list.length === 0 ? (
-            <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.06] bg-card p-12 text-center space-y-3">
+            <motion.div
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+              className="rounded-2xl border border-white/[0.06] bg-card p-12 text-center space-y-3"
+            >
               <div className="h-16 w-16 rounded-2xl bg-primary/10 border border-primary/15 flex items-center justify-center mx-auto">
                 <svg className="w-8 h-8 text-primary/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
                   {tab === "upcoming" ? (
@@ -193,13 +205,8 @@ export default function HistoryPage() {
               )}
             </motion.div>
           ) : (
-            <motion.div
-              className="space-y-3"
-              variants={stagger(0.07)}
-              initial="hidden"
-              animate="show"
-            >
-              {list.map((apt) => {
+            <div className="space-y-3">
+              {list.map((apt, i) => {
                 const bName = (apt.barbers?.profiles as { full_name: string } | null)?.full_name ?? "Barbeiro";
                 const sName = apt.services?.name ?? "Serviço";
                 const isActive = tab === "upcoming";
@@ -207,13 +214,14 @@ export default function HistoryPage() {
                   <motion.div
                     key={apt.id}
                     variants={fadeUp}
-                    layout
+                    initial="hidden"
+                    animate="show"
+                    transition={{ delay: i * 0.06 }}
                     className={cn(
                       "rounded-2xl border bg-card px-5 py-4 space-y-3 relative overflow-hidden",
                       isActive ? "border-white/[0.07] hover:border-primary/20" : "border-white/[0.04] opacity-80"
                     )}
                   >
-                    {/* Status accent line */}
                     <div className={cn("absolute left-0 top-4 bottom-4 w-0.5 rounded-full", displayDot(apt))} />
 
                     <div className="flex items-center gap-3 pl-3">
@@ -259,10 +267,10 @@ export default function HistoryPage() {
                   </motion.div>
                 );
               })}
-            </motion.div>
+            </div>
           )}
         </motion.div>
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }
