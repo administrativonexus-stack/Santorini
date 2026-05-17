@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface AptRow {
   id: string;
@@ -29,21 +30,38 @@ interface AptRow {
   services: { name: string; duration_minutes: number } | null;
 }
 
+type Tab = "upcoming" | "completed" | "cancelled";
+
 const STATUS_OPTIONS = [
-  { value: "confirmed", label: "Confirmado" },
+  { value: "confirmed",   label: "Confirmado" },
   { value: "in_progress", label: "Em andamento" },
-  { value: "completed", label: "Concluído" },
-  { value: "no_show", label: "Não compareceu" },
-  { value: "cancelled", label: "Cancelado" },
+  { value: "completed",   label: "Concluído" },
+  { value: "no_show",     label: "Não compareceu" },
+  { value: "cancelled",   label: "Cancelado" },
 ];
 
 const STATUS_COLOR: Record<string, string> = {
-  pending: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  confirmed: "bg-primary/20 text-primary border-primary/30",
+  pending:     "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  confirmed:   "bg-primary/20 text-primary border-primary/30",
   in_progress: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  completed: "bg-muted text-muted-foreground border-border",
-  cancelled: "bg-destructive/20 text-destructive border-destructive/30",
-  no_show: "bg-destructive/20 text-destructive border-destructive/30",
+  completed:   "bg-green-500/20 text-green-400 border-green-500/30",
+  cancelled:   "bg-destructive/20 text-destructive border-destructive/30",
+  no_show:     "bg-destructive/20 text-destructive border-destructive/30",
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  pending:     "Agendado",
+  confirmed:   "Confirmado",
+  in_progress: "Em andamento",
+  completed:   "Concluído",
+  cancelled:   "Cancelado",
+  no_show:     "Falta",
+};
+
+const EMPTY: Record<Tab, string> = {
+  upcoming:  "Nenhum agendamento futuro nesta semana.",
+  completed: "Nenhum atendimento concluído nesta semana.",
+  cancelled: "Nenhum agendamento cancelado nesta semana.",
 };
 
 function getWeekRange(offset: number) {
@@ -59,6 +77,7 @@ function getWeekRange(offset: number) {
 
 export default function BarberSchedulePage() {
   const [appointments, setAppointments] = useState<AptRow[]>([]);
+  const [tab, setTab] = useState<Tab>("upcoming");
   const [selected, setSelected] = useState<AptRow | null>(null);
   const [newStatus, setNewStatus] = useState("confirmed");
   const [notes, setNotes] = useState("");
@@ -103,17 +122,28 @@ export default function BarberSchedulePage() {
     load();
   }
 
+  const now = new Date();
+  const upcoming = appointments.filter(
+    (a) => ["pending", "confirmed", "in_progress"].includes(a.status) && new Date(a.scheduled_at) >= now
+  );
+  const completed = appointments.filter(
+    (a) => a.status === "completed" || (!["cancelled", "no_show"].includes(a.status) && new Date(a.ends_at) < now)
+  );
+  const cancelled = appointments.filter((a) => ["cancelled", "no_show"].includes(a.status));
+  const list = tab === "upcoming" ? upcoming : tab === "completed" ? completed : cancelled;
+
   const { start, end } = getWeekRange(weekOffset);
   const formatDay = (d: Date) =>
     d.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" });
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-5 max-w-3xl">
       <div>
         <h1 className="font-heading text-3xl font-bold text-foreground">Agenda</h1>
         <p className="text-muted-foreground mt-1">Seus agendamentos da semana.</p>
       </div>
 
+      {/* Week navigation */}
       <div className="flex items-center gap-3">
         <Button variant="outline" size="sm" onClick={() => setWeekOffset((o) => o - 1)}>‹</Button>
         <span className="text-sm text-foreground">
@@ -125,41 +155,77 @@ export default function BarberSchedulePage() {
         )}
       </div>
 
-      {appointments.length === 0 ? (
+      {/* Tabs */}
+      <div className="flex gap-1 p-1 bg-card border border-border rounded-xl">
+        {([
+          { key: "upcoming",  label: "Próximos",   count: upcoming.length },
+          { key: "completed", label: "Concluídos", count: completed.length },
+          { key: "cancelled", label: "Cancelados", count: cancelled.length },
+        ] as { key: Tab; label: string; count: number }[]).map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all",
+              tab === t.key
+                ? "bg-primary text-background font-semibold"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {t.label}
+            {t.count > 0 && (
+              <span className={cn(
+                "text-[10px] rounded-full w-[18px] h-[18px] flex items-center justify-center font-bold",
+                tab === t.key ? "bg-background/25 text-background" : "bg-white/10 text-white/50"
+              )}>
+                {t.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* List */}
+      {list.length === 0 ? (
         <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Nenhum agendamento nesta semana.
+          {EMPTY[tab]}
         </div>
       ) : (
         <div className="space-y-2">
-          {appointments.map((apt) => (
-            <button
-              key={apt.id}
-              onClick={() => openDetail(apt)}
-              className="w-full text-left rounded-xl border border-border bg-card px-5 py-3.5 hover:border-primary/40 transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground text-sm">
-                    {(apt.profiles as { full_name: string } | null)?.full_name ?? "—"}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {apt.services?.name} ·{" "}
-                    {new Date(apt.scheduled_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                    {" – "}
-                    {new Date(apt.ends_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(apt.scheduled_at).toLocaleDateString("pt-BR", {
-                      weekday: "long", day: "numeric", month: "short",
-                    })}
-                  </p>
+          {list.map((apt) => {
+            const effectiveStatus = !["cancelled", "no_show", "completed"].includes(apt.status) && new Date(apt.ends_at) < now
+              ? "completed"
+              : apt.status;
+            return (
+              <button
+                key={apt.id}
+                onClick={() => openDetail(apt)}
+                className="w-full text-left rounded-xl border border-border bg-card px-5 py-3.5 hover:border-primary/40 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground text-sm">
+                      {(apt.profiles as { full_name: string } | null)?.full_name ?? "—"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {apt.services?.name} ·{" "}
+                      {new Date(apt.scheduled_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                      {" – "}
+                      {new Date(apt.ends_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(apt.scheduled_at).toLocaleDateString("pt-BR", {
+                        weekday: "long", day: "numeric", month: "short",
+                      })}
+                    </p>
+                  </div>
+                  <span className={`text-xs font-medium border rounded-full px-2.5 py-0.5 ${STATUS_COLOR[effectiveStatus] ?? ""}`}>
+                    {STATUS_LABEL[effectiveStatus] ?? apt.status}
+                  </span>
                 </div>
-                <span className={`text-xs font-medium border rounded-full px-2.5 py-0.5 ${STATUS_COLOR[apt.status] ?? ""}`}>
-                  {STATUS_OPTIONS.find((s) => s.value === apt.status)?.label ?? apt.status}
-                </span>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       )}
 
