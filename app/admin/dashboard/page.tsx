@@ -7,22 +7,31 @@ interface Stat {
   value: string | number;
 }
 
-const STATUS_COLOR: Record<string, string> = {
-  pending: "text-yellow-400",
-  confirmed: "text-primary",
-  in_progress: "text-blue-400",
-  completed: "text-muted-foreground",
-  cancelled: "text-destructive",
-  no_show: "text-destructive",
+const STATUS_BADGE: Record<string, string> = {
+  pending:     "bg-blue-500/15 text-blue-400 border border-blue-500/20",
+  confirmed:   "bg-primary/15 text-primary border border-primary/20",
+  in_progress: "bg-blue-500/15 text-blue-400 border border-blue-500/20",
+  completed:   "bg-green-500/15 text-green-400 border border-green-500/20",
+  cancelled:   "bg-red-500/15 text-red-400 border border-red-500/20",
+  no_show:     "bg-red-500/15 text-red-400 border border-red-500/20",
+};
+
+const STATUS_DOT: Record<string, string> = {
+  pending:     "bg-blue-400",
+  confirmed:   "bg-primary",
+  in_progress: "bg-blue-400",
+  completed:   "bg-green-400",
+  cancelled:   "bg-red-400",
+  no_show:     "bg-red-400",
 };
 
 const STATUS_LABEL: Record<string, string> = {
-  pending: "Aguardando",
-  confirmed: "Confirmado",
+  pending:     "Agendado",
+  confirmed:   "Confirmado",
   in_progress: "Em andamento",
-  completed: "Concluído",
-  cancelled: "Cancelado",
-  no_show: "Falta",
+  completed:   "Concluído",
+  cancelled:   "Cancelado",
+  no_show:     "Falta",
 };
 
 export default async function AdminDashboard() {
@@ -50,7 +59,7 @@ export default async function AdminDashboard() {
        profiles!appointments_client_id_fkey ( full_name ),
        services ( name ),
        barbers ( profiles ( full_name ) )`
-    ).order("scheduled_at", { ascending: false }).limit(8),
+    ).order("scheduled_at", { ascending: false }).limit(10),
   ]);
 
   const stats: Stat[] = [
@@ -86,18 +95,20 @@ export default async function AdminDashboard() {
               const service = apt.services as { name: string } | null;
               const barberProfile = (apt.barbers as { profiles: { full_name: string } | null } | null)?.profiles;
               return (
-                <div key={apt.id} className="flex items-center justify-between px-5 py-3.5">
-                  <div className="min-w-0 flex-1">
+                <div key={apt.id} className="flex items-center gap-4 px-5 py-3.5 relative overflow-hidden">
+                  <div className={`absolute left-0 top-3 bottom-3 w-0.5 rounded-full ${STATUS_DOT[apt.status] ?? "bg-white/20"}`} />
+                  <div className="min-w-0 flex-1 pl-3">
                     <p className="text-sm font-medium text-foreground truncate">{client?.full_name ?? "—"}</p>
                     <p className="text-xs text-muted-foreground">{service?.name} · {barberProfile?.full_name}</p>
                   </div>
-                  <div className="ml-4 text-right shrink-0">
+                  <div className="text-right shrink-0 space-y-1">
                     <p className="text-xs text-muted-foreground">
-                      {new Date(apt.scheduled_at).toLocaleDateString("pt-BR")}
+                      {new Date(apt.scheduled_at).toLocaleDateString("pt-BR")} às{" "}
+                      {new Date(apt.scheduled_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                     </p>
-                    <p className={`text-xs font-medium ${STATUS_COLOR[apt.status] ?? "text-muted-foreground"}`}>
+                    <span className={`inline-block text-[10px] font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[apt.status] ?? "bg-white/5 text-white/40 border border-white/10"}`}>
                       {STATUS_LABEL[apt.status] ?? apt.status}
-                    </p>
+                    </span>
                   </div>
                 </div>
               );
