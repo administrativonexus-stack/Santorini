@@ -8,13 +8,17 @@ create table profiles (
 );
 
 -- Auto-create profile row when a new auth user signs up
+-- SET search_path = public required for SECURITY DEFINER to resolve public.profiles
 create or replace function handle_new_user()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql
+security definer set search_path = public
+as $$
 begin
-  insert into public.profiles (id, full_name, avatar_url)
+  insert into public.profiles (id, full_name, phone, avatar_url)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1)),
+    new.raw_user_meta_data->>'phone',
     new.raw_user_meta_data->>'avatar_url'
   );
   return new;
