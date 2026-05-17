@@ -55,11 +55,18 @@ export default async function ClientDashboard() {
 
   const firstName = profile?.full_name?.split(" ")[0] ?? "Cliente";
 
+  // Ensure activeAppointment is always included in the list
+  const aptList = recentAppointments ?? [];
+  const mergedAppointments =
+    activeAppointment && !aptList.find((a) => a.id === activeAppointment.id)
+      ? [activeAppointment, ...aptList]
+      : aptList;
+
   return (
     <DashboardContent
       firstName={firstName}
       activeAppointment={activeAppointment ?? null}
-      recentAppointments={recentAppointments ?? []}
+      recentAppointments={mergedAppointments}
       subscription={subscription ?? null}
       appointmentCount={appointmentCount ?? 0}
     />
