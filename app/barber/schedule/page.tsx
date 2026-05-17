@@ -59,20 +59,18 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const EMPTY: Record<Tab, string> = {
-  upcoming:  "Nenhum agendamento futuro nesta semana.",
-  completed: "Nenhum atendimento concluído nesta semana.",
-  cancelled: "Nenhum agendamento cancelado nesta semana.",
+  upcoming:  "Nenhum agendamento futuro neste dia.",
+  completed: "Nenhum atendimento concluído neste dia.",
+  cancelled: "Nenhum agendamento cancelado neste dia.",
 };
 
-function getWeekRange(offset: number) {
-  const now = new Date();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7) + offset * 7);
-  monday.setHours(0, 0, 0, 0);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  sunday.setHours(23, 59, 59, 999);
-  return { start: monday, end: sunday };
+function getDayRange(offset: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  d.setHours(0, 0, 0, 0);
+  const end = new Date(d);
+  end.setHours(23, 59, 59, 999);
+  return { start: d, end };
 }
 
 export default function BarberSchedulePage() {
@@ -82,18 +80,18 @@ export default function BarberSchedulePage() {
   const [newStatus, setNewStatus] = useState("confirmed");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
-  const [weekOffset, setWeekOffset] = useState(0);
+  const [dayOffset, setDayOffset] = useState(0);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
-    const { start, end } = getWeekRange(weekOffset);
+    const { start, end } = getDayRange(dayOffset);
     const res = await fetch(
       `/api/barber/schedule?start=${start.toISOString()}&end=${end.toISOString()}`
     );
     if (!res.ok) return;
     const { appointments: data } = await res.json();
     setAppointments(data ?? []);
-  }, [weekOffset]);
+  }, [dayOffset]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -132,26 +130,29 @@ export default function BarberSchedulePage() {
   const cancelled = appointments.filter((a) => ["cancelled", "no_show"].includes(a.status));
   const list = tab === "upcoming" ? upcoming : tab === "completed" ? completed : cancelled;
 
-  const { start, end } = getWeekRange(weekOffset);
-  const formatDay = (d: Date) =>
-    d.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short" });
+  const { start } = getDayRange(dayOffset);
+  const dayLabel =
+    dayOffset === 0  ? "Hoje" :
+    dayOffset === 1  ? "Amanhã" :
+    dayOffset === -1 ? "Ontem" :
+    start.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
 
   return (
     <div className="space-y-5 max-w-3xl">
       <div>
         <h1 className="font-heading text-3xl font-bold text-foreground">Agenda</h1>
-        <p className="text-muted-foreground mt-1">Seus agendamentos da semana.</p>
+        <p className="text-muted-foreground mt-1">Seus agendamentos do dia.</p>
       </div>
 
-      {/* Week navigation */}
+      {/* Day navigation */}
       <div className="flex items-center gap-3">
-        <Button variant="outline" size="sm" onClick={() => setWeekOffset((o) => o - 1)}>‹</Button>
-        <span className="text-sm text-foreground">
-          {formatDay(start)} – {formatDay(end)}
+        <Button variant="outline" size="sm" onClick={() => setDayOffset((o) => o - 1)}>‹</Button>
+        <span className="text-sm font-medium text-foreground capitalize min-w-[180px] text-center">
+          {dayLabel}
         </span>
-        <Button variant="outline" size="sm" onClick={() => setWeekOffset((o) => o + 1)}>›</Button>
-        {weekOffset !== 0 && (
-          <Button variant="ghost" size="sm" onClick={() => setWeekOffset(0)}>Hoje</Button>
+        <Button variant="outline" size="sm" onClick={() => setDayOffset((o) => o + 1)}>›</Button>
+        {dayOffset !== 0 && (
+          <Button variant="ghost" size="sm" onClick={() => setDayOffset(0)}>Hoje</Button>
         )}
       </div>
 
