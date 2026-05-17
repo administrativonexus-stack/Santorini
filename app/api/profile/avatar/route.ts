@@ -19,7 +19,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "File size must be under 5MB" }, { status: 400 });
   }
 
-  const ext = file.name.split(".").pop() ?? "jpg";
+  const rawExt = (file.name.split(".").pop() ?? "").toLowerCase();
+  const ext = ["jpg", "jpeg", "png", "webp"].includes(rawExt) ? rawExt : "jpg";
   const path = `${session.user.id}/${Date.now()}.${ext}`;
 
   const admin = createAdminClient();

@@ -11,7 +11,6 @@ const ROLE_HOME: Record<string, string> = {
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/";
 
   if (code) {
     const supabase = await createClient();
@@ -31,7 +30,7 @@ export async function GET(request: Request) {
 
         const role = profile?.role ?? "client";
         return NextResponse.redirect(
-          new URL(ROLE_HOME[role] ?? next, origin)
+          new URL(ROLE_HOME[role] ?? "/login", origin)
         );
       }
     }

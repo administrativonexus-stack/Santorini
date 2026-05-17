@@ -35,9 +35,6 @@ export default function LoginPage() {
 
     const supabase = createClient();
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  
-console.log(data)
-console.log(error)
 
     if (error || !data.user) {
       setError("Email ou senha incorretos.");

@@ -93,13 +93,11 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { barberId, serviceId, scheduledAt, endsAt, isVip, servicePrice } = body as {
+  const { barberId, serviceId, scheduledAt, endsAt } = body as {
     barberId: string;
     serviceId: string;
     scheduledAt: string;
     endsAt: string;
-    isVip: boolean;
-    servicePrice: number;
   };
 
   if (!barberId || !serviceId || !scheduledAt || !endsAt) {
@@ -116,14 +114,12 @@ export async function POST(req: NextRequest) {
     .in("status", ["pending", "confirmed", "in_progress"])
     .lt("ends_at", new Date().toISOString());
 
-  // Verify VIP server-side to prevent price manipulation
-  const { data: sub } = await admin
-    .from("subscriptions")
-    .select("id")
-    .eq("client_id", session.user.id)
-    .eq("status", "active")
-    .maybeSingle();
-  const pricePaid = sub ? 0 : servicePrice;
+  // Fetch price server-side — never trust client-supplied price
+  const [{ data: sub }, { data: svcRow }] = await Promise.all([
+    admin.from("subscriptions").select("id").eq("client_id", session.user.id).eq("status", "active").maybeSingle(),
+    admin.from("services").select("price").eq("id", serviceId).single(),
+  ]);
+  const pricePaid = sub ? 0 : (svcRow?.price ?? 0);
 
   const { error } = await admin.from("appointments").insert({
     client_id: session.user.id,

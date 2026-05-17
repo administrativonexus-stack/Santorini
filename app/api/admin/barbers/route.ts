@@ -49,7 +49,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "email e full_name são obrigatórios" }, { status: 400 });
   }
 
-  const tempPassword = "Barber@" + Math.random().toString(36).slice(-8);
+  const buf = new Uint8Array(10);
+  crypto.getRandomValues(buf);
+  const tempPassword = "B@" + Array.from(buf).map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 12);
 
   const { data: created, error: createErr } = await admin.auth.admin.createUser({
     email,
