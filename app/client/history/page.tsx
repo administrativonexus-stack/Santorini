@@ -68,15 +68,17 @@ function getInitials(name: string) {
 
 export default function HistoryPage() {
   const [appointments, setAppointments] = useState<AptRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"upcoming" | "previous">("upcoming");
   const [cancelling, setCancelling] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
     const res = await fetch("/api/client/appointments");
-    if (!res.ok) return;
+    if (!res.ok) { setLoading(false); return; }
     const { appointments: data } = await res.json();
     setAppointments(data ?? []);
+    setLoading(false);
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -106,6 +108,18 @@ export default function HistoryPage() {
   const previous = visible.filter((a) => isPast(a));
   const list = tab === "upcoming" ? upcoming : previous;
   const totalVisits = visible.filter((a) => isPast(a)).length;
+
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-5">
+        <div className="h-8 w-40 rounded-xl bg-card animate-pulse" />
+        <div className="h-12 rounded-xl bg-card animate-pulse" />
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => <div key={i} className="h-28 rounded-2xl bg-card animate-pulse" />)}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
