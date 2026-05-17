@@ -212,6 +212,7 @@ export interface Database {
           status: AppointmentStatus;
           price_paid: number | null;
           notes: string | null;
+          reminder_sent: boolean;
           created_at: string;
         };
         Insert: {
@@ -224,6 +225,7 @@ export interface Database {
           status?: AppointmentStatus;
           price_paid?: number | null;
           notes?: string | null;
+          reminder_sent?: boolean;
         };
         Update: {
           status?: AppointmentStatus;
@@ -231,6 +233,7 @@ export interface Database {
           notes?: string | null;
           scheduled_at?: string;
           ends_at?: string;
+          reminder_sent?: boolean;
         };
         Relationships: [
           {
