@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Crown, Star, Check } from "lucide-react";
+import { Crown, Star } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { fadeUp, stagger } from "@/lib/motion";
@@ -135,7 +135,7 @@ export default function SubscriptionPage() {
               <p className="text-xs text-white/30">Integração com pagamento em breve. Entre em contato para ativar.</p>
               <motion.div whileTap={{ scale: 0.98 }}>
                 <Link
-                  href="https://wa.me/"
+                  href="https://santorini-pgv.vercel.app/"
                   target="_blank"
                   className={cn(buttonVariants(), "w-full justify-center h-11 font-bold tracking-wide gap-2")}
                 >
