@@ -6,7 +6,6 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 
 const ROLE_HOME: Record<string, string> = {
@@ -22,12 +21,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpLoading, setOtpLoading] = useState(false);
-  const [otpError, setOtpError] = useState("");
-
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -42,8 +35,6 @@ export default function LoginPage() {
       return;
     }
 
-    // Session is now in document.cookie via @supabase/ssr browser client.
-    // Fetch the profile role before navigating so we can go to the right dashboard.
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
@@ -62,27 +53,6 @@ export default function LoginPage() {
     });
   }
 
-  async function handleSendOtp(e: React.FormEvent) {
-    e.preventDefault();
-    setOtpLoading(true);
-    setOtpError("");
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({ phone });
-    if (error) { setOtpError("Erro ao enviar SMS."); setOtpLoading(false); return; }
-    setOtpSent(true);
-    setOtpLoading(false);
-  }
-
-  async function handleVerifyOtp(e: React.FormEvent) {
-    e.preventDefault();
-    setOtpLoading(true);
-    setOtpError("");
-    const supabase = createClient();
-    const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: "sms" });
-    if (error) { setOtpError("Código inválido."); setOtpLoading(false); return; }
-    window.location.href = "/client/dashboard";
-  }
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-8">
@@ -92,52 +62,20 @@ export default function LoginPage() {
         </div>
 
         <div className="rounded-xl border border-border bg-card p-6 shadow-lg space-y-5">
-          <Tabs defaultValue="email" className="space-y-4">
-            <TabsList className="w-full">
-              <TabsTrigger value="email" className="flex-1">Email</TabsTrigger>
-              <TabsTrigger value="phone" className="flex-1">Telefone</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="email">
-              <form onSubmit={handleEmailLogin} className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" required autoComplete="email" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="password">Senha</Label>
-                  <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required autoComplete="current-password" />
-                </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Entrando..." : "Entrar"}
-                </Button>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="phone">
-              {!otpSent ? (
-                <form onSubmit={handleSendOtp} className="space-y-4">
-                  <div className="space-y-1.5">
-                    <Label>Telefone</Label>
-                    <Input type="tel" placeholder="+55 11 99999-9999" value={phone} onChange={e => setPhone(e.target.value)} required />
-                  </div>
-                  {otpError && <p className="text-sm text-destructive">{otpError}</p>}
-                  <Button type="submit" className="w-full" disabled={otpLoading}>{otpLoading ? "Enviando..." : "Enviar código"}</Button>
-                </form>
-              ) : (
-                <form onSubmit={handleVerifyOtp} className="space-y-4">
-                  <p className="text-sm text-muted-foreground">Código enviado para <span className="text-primary">{phone}</span></p>
-                  <div className="space-y-1.5">
-                    <Label>Código SMS</Label>
-                    <Input type="text" inputMode="numeric" maxLength={6} placeholder="000000" value={otp} onChange={e => setOtp(e.target.value)} required className="text-center tracking-[0.5em] text-lg" />
-                  </div>
-                  {otpError && <p className="text-sm text-destructive">{otpError}</p>}
-                  <Button type="submit" className="w-full" disabled={otpLoading}>{otpLoading ? "Verificando..." : "Verificar"}</Button>
-                </form>
-              )}
-            </TabsContent>
-          </Tabs>
+          <form onSubmit={handleEmailLogin} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" required autoComplete="email" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="password">Senha</Label>
+              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required autoComplete="current-password" />
+            </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Entrando..." : "Entrar"}
+            </Button>
+          </form>
 
           <div className="flex items-center gap-3">
             <Separator className="flex-1" />
