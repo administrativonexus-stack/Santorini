@@ -8,6 +8,7 @@ interface AptRow {
   scheduled_at: string;
   ends_at: string;
   status: string;
+  guest_name?: string | null;
   profiles: { full_name: string } | null;
   services: { name: string } | null;
   barbers: { profiles: { full_name: string } | null } | null;
@@ -107,6 +108,7 @@ export function AppointmentsTabs({ appointments }: { appointments: AptRow[] }) {
         ) : (
           list.map((apt) => {
             const client = apt.profiles as { full_name: string } | null;
+            const clientName = client?.full_name ?? apt.guest_name ?? "—";
             const service = apt.services as { name: string } | null;
             const barberProfile = (apt.barbers as { profiles: { full_name: string } | null } | null)?.profiles;
             const effectiveStatus = !["cancelled", "no_show", "completed"].includes(apt.status) && new Date(apt.ends_at) < now
@@ -116,7 +118,10 @@ export function AppointmentsTabs({ appointments }: { appointments: AptRow[] }) {
               <div key={apt.id} className="flex items-center gap-4 px-5 py-3.5 relative overflow-hidden">
                 <div className={`absolute left-0 top-3 bottom-3 w-0.5 rounded-full ${STATUS_DOT[effectiveStatus] ?? "bg-white/20"}`} />
                 <div className="min-w-0 flex-1 pl-3">
-                  <p className="text-sm font-medium text-foreground truncate">{client?.full_name ?? "—"}</p>
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {clientName}
+                    {!client && apt.guest_name && <span className="ml-1.5 text-[10px] text-white/30 border border-white/10 rounded px-1">visitante</span>}
+                  </p>
                   <p className="text-xs text-muted-foreground">{service?.name} · {barberProfile?.full_name}</p>
                 </div>
                 <div className="text-right shrink-0 space-y-1">

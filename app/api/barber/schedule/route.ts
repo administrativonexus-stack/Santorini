@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
   const { data, error: dbErr } = await admin
     .from("appointments")
     .select(
-      `id, scheduled_at, ends_at, status, price_paid, notes,
+      `id, scheduled_at, ends_at, status, price_paid, notes, guest_name, guest_phone,
        profiles!appointments_client_id_fkey ( full_name, phone ),
        services ( name, duration_minutes )`
     )

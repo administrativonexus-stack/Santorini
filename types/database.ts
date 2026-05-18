@@ -204,7 +204,7 @@ export interface Database {
       appointments: {
         Row: {
           id: string;
-          client_id: string;
+          client_id: string | null;
           barber_id: string;
           service_id: string;
           scheduled_at: string;
@@ -213,11 +213,13 @@ export interface Database {
           price_paid: number | null;
           notes: string | null;
           reminder_sent: boolean;
+          guest_name: string | null;
+          guest_phone: string | null;
           created_at: string;
         };
         Insert: {
           id?: string;
-          client_id: string;
+          client_id?: string | null;
           barber_id: string;
           service_id: string;
           scheduled_at: string;
@@ -226,6 +228,8 @@ export interface Database {
           price_paid?: number | null;
           notes?: string | null;
           reminder_sent?: boolean;
+          guest_name?: string | null;
+          guest_phone?: string | null;
         };
         Update: {
           status?: AppointmentStatus;
@@ -234,6 +238,8 @@ export interface Database {
           scheduled_at?: string;
           ends_at?: string;
           reminder_sent?: boolean;
+          guest_name?: string | null;
+          guest_phone?: string | null;
         };
         Relationships: [
           {

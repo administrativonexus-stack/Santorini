@@ -26,6 +26,8 @@ interface AptRow {
   status: string;
   price_paid: number | null;
   notes: string | null;
+  guest_name: string | null;
+  guest_phone: string | null;
   profiles: { full_name: string; phone: string | null } | null;
   services: { name: string; duration_minutes: number } | null;
 }
@@ -206,7 +208,7 @@ export default function BarberSchedulePage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium text-foreground text-sm">
-                      {(apt.profiles as { full_name: string } | null)?.full_name ?? "—"}
+                      {(apt.profiles as { full_name: string } | null)?.full_name ?? apt.guest_name ?? "—"}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {apt.services?.name} ·{" "}
@@ -234,7 +236,7 @@ export default function BarberSchedulePage() {
         <DialogContent className="bg-card border-border">
           <DialogHeader>
             <DialogTitle className="font-heading">
-              {(selected?.profiles as { full_name: string } | null)?.full_name}
+              {(selected?.profiles as { full_name: string } | null)?.full_name ?? selected?.guest_name ?? "—"}
             </DialogTitle>
           </DialogHeader>
           {selected && (

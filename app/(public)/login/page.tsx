@@ -98,6 +98,12 @@ export default function LoginPage() {
           Não tem conta?{" "}
           <Link href="/register" className="text-primary font-medium transition-colors">Cadastre-se</Link>
         </p>
+
+        <div className="text-center">
+          <Link href="/agendar" className="text-sm text-white/50 hover:text-primary transition-colors font-medium">
+            Agendar sem cadastrar →
+          </Link>
+        </div>
       </div>
     </div>
   );

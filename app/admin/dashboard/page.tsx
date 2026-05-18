@@ -29,7 +29,7 @@ export default async function AdminDashboard() {
     admin.from("appointments").select("id", { count: "exact", head: true }).gte("scheduled_at", startOfDay).not("status", "in", '("cancelled","no_show")'),
     admin.from("appointments").select("id", { count: "exact", head: true }).gte("scheduled_at", startOfMonth).not("status", "in", '("cancelled","no_show")'),
     admin.from("appointments").select(
-      `id, scheduled_at, ends_at, status,
+      `id, scheduled_at, ends_at, status, guest_name,
        profiles!appointments_client_id_fkey ( full_name ),
        services ( name ),
        barbers ( profiles ( full_name ) )`
