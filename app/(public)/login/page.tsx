@@ -8,6 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
+const TEST_ACCOUNTS = [
+  { role: "Admin",    email: "admin@barberflix.test",    password: "Test@admin123",  color: "text-red-400",   border: "border-red-500/20",   bg: "hover:bg-red-500/5" },
+  { role: "Barbeiro", email: "barbeiro@barberflix.test", password: "Test@barber123", color: "text-blue-400",  border: "border-blue-500/20",  bg: "hover:bg-blue-500/5" },
+  { role: "Cliente",  email: "cliente@barberflix.test",  password: "Test@client123", color: "text-green-400", border: "border-green-500/20", bg: "hover:bg-green-500/5" },
+];
+
 const ROLE_HOME: Record<string, string> = {
   client: "/client/dashboard",
   barber: "/barber/dashboard",
@@ -20,6 +26,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showDemo, setShowDemo] = useState(false);
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -92,6 +99,37 @@ export default function LoginPage() {
             </svg>
             Entrar com Google
           </Button>
+        </div>
+
+        {/* Test accounts accordion */}
+        <div className="rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setShowDemo((v) => !v)}
+            className="w-full flex items-center justify-between px-4 py-3 text-left"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-white/40">Contas de Teste</span>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/15 text-primary border border-primary/20 tracking-wider">DEV</span>
+            </div>
+            <span className="text-white/30 text-xs">{showDemo ? "▲" : "▼"}</span>
+          </button>
+          {showDemo && (
+            <div className="px-4 pb-4 space-y-2 border-t border-white/5 pt-3">
+              {TEST_ACCOUNTS.map((acc) => (
+                <button
+                  key={acc.role}
+                  type="button"
+                  onClick={() => { setEmail(acc.email); setPassword(acc.password); }}
+                  className={`w-full flex items-center justify-between rounded-lg border ${acc.border} ${acc.bg} px-3 py-2.5 transition-colors text-left`}
+                >
+                  <span className={`text-xs font-semibold ${acc.color}`}>{acc.role}</span>
+                  <span className="text-[11px] text-white/30 font-mono">{acc.email}</span>
+                </button>
+              ))}
+              <p className="text-[11px] text-white/20 text-center pt-1">Clique para preencher os campos</p>
+            </div>
+          )}
         </div>
 
         <p className="text-center text-sm text-muted-foreground">
