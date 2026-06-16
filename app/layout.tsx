@@ -14,9 +14,9 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "BARBERFLIX — Barbearia Santorini",
+  title: "SUA BARBEARIA — Agendamento Premium",
   description:
-    "Experiência premium de agendamento e assinatura para a Barbearia Santorini.",
+    "Experiência premium de agendamento e assinatura para a Sua Barbearia.",
 };
 
 export const viewport: Viewport = {

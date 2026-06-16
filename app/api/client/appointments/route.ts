@@ -73,7 +73,7 @@ export async function PATCH(req: NextRequest) {
     clientProfile?.phone
       ? sendWhatsApp(
           clientProfile.phone,
-          `❌ *Agendamento cancelado*\n\nSeu agendamento de *${svcName}* em ${date} às ${time} foi cancelado.\n\nPara reagendar acesse o app. Barbearia Santorini 💈`
+          `❌ *Agendamento cancelado*\n\nSeu agendamento de *${svcName}* em ${date} às ${time} foi cancelado.\n\nPara reagendar acesse o app. Sua Barbearia 💈`
         )
       : Promise.resolve(),
     barberProfile?.phone
@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
     clientProfile?.phone
       ? sendWhatsApp(
           clientProfile.phone,
-          `✅ *Agendamento confirmado!*\n\n📋 Serviço: ${svcName}\n✂️ Barbeiro: ${barberProfile?.full_name ?? "—"}\n📅 ${date}\n⏰ ${time}\n\nBarbearia Santorini 💈`
+          `✅ *Agendamento confirmado!*\n\n📋 Serviço: ${svcName}\n✂️ Barbeiro: ${barberProfile?.full_name ?? "—"}\n📅 ${date}\n⏰ ${time}\n\nSua Barbearia 💈`
         )
       : Promise.resolve(),
     barberProfile?.phone

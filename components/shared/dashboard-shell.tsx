@@ -63,7 +63,7 @@ export function DashboardShell({ role, fullName, avatarUrl, isVip, children }: D
                 <rect y="15" width="20" height="2" rx="1" />
               </svg>
             </button>
-            <span className="font-heading text-lg font-bold tracking-widest text-primary">BARBERFLIX</span>
+            <span className="font-heading text-lg font-bold tracking-widest text-primary">SUA BARBEARIA</span>
           </header>
         )}
 

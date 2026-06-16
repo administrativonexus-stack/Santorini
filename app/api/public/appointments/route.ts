@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
 
   await Promise.all([
     guestPhone
-      ? sendWhatsApp(guestPhone, `✅ *Agendamento confirmado!*\n\n📋 Serviço: ${svcName}\n✂️ Barbeiro: ${barberProfile?.full_name ?? "—"}\n📅 ${date}\n⏰ ${time}\n\nBarbearia Santorini 💈`)
+      ? sendWhatsApp(guestPhone, `✅ *Agendamento confirmado!*\n\n📋 Serviço: ${svcName}\n✂️ Barbeiro: ${barberProfile?.full_name ?? "—"}\n📅 ${date}\n⏰ ${time}\n\nSua Barbearia 💈`)
       : Promise.resolve(),
     barberProfile?.phone
       ? sendWhatsApp(barberProfile.phone, `📅 *Novo agendamento!*\n\n👤 Cliente: ${guestName.trim()}\n📋 Serviço: ${svcName}\n📅 ${date}\n⏰ ${time}`)

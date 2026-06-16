@@ -46,7 +46,7 @@ export default async function AdminDashboard() {
     <div className="space-y-8 max-w-4xl">
       <div>
         <h1 className="font-heading text-3xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Visão geral da Barbearia Santorini.</p>
+        <p className="text-muted-foreground mt-1">Visão geral da Sua Barbearia.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

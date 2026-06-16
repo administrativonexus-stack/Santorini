@@ -206,7 +206,7 @@ export default function GuestSchedulePage() {
         <Link href="/login" className="text-white/40 hover:text-white/70 transition-colors">
           <ChevronLeft className="w-5 h-5" />
         </Link>
-        <span className="font-heading text-lg font-bold tracking-widest text-primary">BARBERFLIX</span>
+        <span className="font-heading text-lg font-bold tracking-widest text-primary">SUA BARBEARIA</span>
         <div className="w-5" />
       </header>
 

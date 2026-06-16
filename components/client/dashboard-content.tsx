@@ -165,7 +165,7 @@ export function DashboardContent({
             <p className="text-[10px] text-white/40 uppercase tracking-wider">Cortes este mês</p>
           </div>
           <p className="text-3xl font-heading font-semibold tracking-tight text-foreground">{appointmentCount}</p>
-          <p className="text-[10px] text-white/30">na Barbearia Santorini</p>
+          <p className="text-[10px] text-white/30">na Sua Barbearia</p>
         </div>
 
         {/* Quick action */}

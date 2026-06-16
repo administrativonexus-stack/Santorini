@@ -128,7 +128,7 @@ export default function HistoryPage() {
         <h1 className="font-heading text-[26px] font-bold text-foreground">Histórico</h1>
         {totalVisits > 0 && (
           <p className="text-sm text-white/40 mt-0.5">
-            {totalVisits} {totalVisits === 1 ? "visita" : "visitas"} na Barbearia Santorini
+            {totalVisits} {totalVisits === 1 ? "visita" : "visitas"} na Sua Barbearia
           </p>
         )}
       </motion.div>

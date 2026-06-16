@@ -81,7 +81,7 @@ export default function RegisterPage() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
         <div className="w-full max-w-sm space-y-6 text-center">
           <h1 className="font-heading text-4xl font-bold tracking-widest text-primary">
-            BARBERFLIX
+            SUA BARBEARIA
           </h1>
           <div className="rounded-xl border border-border bg-card p-8 space-y-3">
             <p className="text-lg font-medium text-foreground">
@@ -109,7 +109,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
           <h1 className="font-heading text-4xl font-bold tracking-widest text-primary">
-            BARBERFLIX
+            SUA BARBEARIA
           </h1>
           <p className="mt-2 text-sm tracking-widest text-muted-foreground uppercase">
             Criar conta

@@ -91,8 +91,8 @@ export default function SubscriptionPage() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-primary/70 uppercase tracking-[0.2em] font-medium mb-1">Plano</p>
-              <h1 className="font-heading text-2xl font-bold text-primary tracking-wider">VIP BARBERFLIX</h1>
-              <p className="text-sm text-white/40 mt-0.5">Barbearia Santorini</p>
+              <h1 className="font-heading text-2xl font-bold text-primary tracking-wider">VIP SUA BARBEARIA</h1>
+              <p className="text-sm text-white/40 mt-0.5">Sua Barbearia</p>
             </div>
             <Crown className="w-8 h-8 text-primary/80 shrink-0" />
           </div>
@@ -135,7 +135,7 @@ export default function SubscriptionPage() {
               <p className="text-xs text-white/30">Integração com pagamento em breve. Entre em contato para ativar.</p>
               <motion.div whileTap={{ scale: 0.98 }}>
                 <Link
-                  href="https://santorini-pgv.vercel.app/"
+                  href="https://santorini-umber.vercel.app/"
                   target="_blank"
                   className={cn(buttonVariants(), "w-full justify-center h-11 font-bold tracking-wide gap-2")}
                 >

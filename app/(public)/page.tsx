@@ -19,7 +19,7 @@ const features = [
   {
     title: "Barbeiros Premium",
     description:
-      "Profissionais selecionados da Barbearia Santorini. Avaliações reais de clientes.",
+      "Profissionais selecionados da Sua Barbearia. Avaliações reais de clientes.",
   },
   {
     title: "Confirmação Instantânea",
@@ -43,7 +43,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4 border-b border-border">
         <span className="font-heading text-xl font-bold tracking-widest text-primary">
-          BARBERFLIX
+          SUA BARBEARIA
         </span>
         <nav className="flex items-center gap-3">
           <Link
@@ -70,11 +70,10 @@ export default function LandingPage() {
           className="space-y-6 max-w-2xl w-full"
         >
           <p className="text-xs tracking-[0.4em] text-muted-foreground uppercase">
-            Barbearia Santorini
+            Sua Barbearia
           </p>
           <h1 className="font-heading text-4xl sm:text-6xl md:text-8xl font-bold tracking-[0.15em] text-foreground">
-            BARBER
-            <span className="text-primary">FLIX</span>
+            SUA <span className="text-primary">BARBEARIA</span>
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-md mx-auto">
             A experiência premium de agendamento e assinatura para quem valoriza
@@ -151,7 +150,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-border py-6 px-6 text-center">
         <p className="text-xs text-muted-foreground tracking-widest">
-          © {new Date().getFullYear()} BARBERFLIX · Barbearia Santorini
+          © {new Date().getFullYear()} SUA BARBEARIA
         </p>
       </footer>
     </div>

@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
     if (clientP?.phone) {
       await sendWhatsApp(
         clientP.phone,
-        `⏰ *Lembrete de agendamento*\n\nSeu horário é em 1 hora!\n\n📋 ${svcName} com ${barberP?.full_name ?? "barbeiro"}\n⏰ ${time}\n\nBarbearia Santorini 💈`
+        `⏰ *Lembrete de agendamento*\n\nSeu horário é em 1 hora!\n\n📋 ${svcName} com ${barberP?.full_name ?? "barbeiro"}\n⏰ ${time}\n\nSua Barbearia 💈`
       );
       sent++;
     }

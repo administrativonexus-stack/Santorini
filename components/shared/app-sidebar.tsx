@@ -111,7 +111,7 @@ export function AppSidebar({ role, fullName, avatarUrl, isVip, className, onClos
             <path d="M12 2L3 7v10l9 5 9-5V7L12 2z" strokeLinejoin="round"/>
             <path d="M8 10l2.5 2.5M16 10l-2.5 2.5M10.5 12.5L12 15l1.5-2.5" strokeLinecap="round"/>
           </svg>
-          <span className="font-heading text-lg font-bold tracking-widest text-primary">BARBERFLIX</span>
+          <span className="font-heading text-lg font-bold tracking-widest text-primary">SUA BARBEARIA</span>
         </div>
         {onClose && (
           <button onClick={onClose} className="p-1 text-muted-foreground hover:text-foreground transition-colors" aria-label="Fechar">
